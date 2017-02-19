@@ -1,2 +1,9 @@
 #passwords
 *.ini
+
+# ipython metadata
+*ipynb_checkpoints*
+
+# data
+*.txt
+*.json

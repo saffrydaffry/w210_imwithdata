@@ -1,4 +1,12 @@
-[api.keys]
+[google]
 google_drive = 
+
+[global_giving]
 global_giving = 
+
+[twitter]
+consumer_key = 
+consumer_secret = 
+access_token =  
+access_token_secret =
 
