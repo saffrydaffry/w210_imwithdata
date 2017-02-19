@@ -1,2 +1,4 @@
-[google.api]
-apikey = YOUR_KEY_HERE
+[api.keys]
+google_drive = 
+global_giving = 
+
