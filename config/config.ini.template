@@ -2,7 +2,7 @@
 google_drive = 
 
 [global_giving]
-global_giving = 
+api_key = 
 
 [twitter]
 consumer_key = 
