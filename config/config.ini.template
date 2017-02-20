@@ -14,3 +14,5 @@ access_token_secret =
 AWS_ACCESS_KEY_ID = 
 AWS_SECRET_ACCESS_KEY = 
 
+[facebook.api]
+event_key = 
