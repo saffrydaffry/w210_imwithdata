@@ -1,12 +1,16 @@
-[google]
-google_drive = 
-
-[global_giving]
+[google.api]
 api_key = 
 
-[twitter]
+[globalgiving.api]
+api_key = 
+
+[twitter.api]
 consumer_key = 
 consumer_secret = 
 access_token =  
 access_token_secret =
+
+[aws.creds]
+AWS_ACCESS_KEY_ID = 
+AWS_SECRET_ACCESS_KEY = 
 
