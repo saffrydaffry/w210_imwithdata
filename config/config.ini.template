@@ -16,3 +16,8 @@ AWS_SECRET_ACCESS_KEY =
 
 [facebook.api]
 event_key = 
+
+[elasticsearch]
+host = 
+port = 
+kibana_port = 
