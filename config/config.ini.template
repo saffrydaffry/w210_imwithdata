@@ -15,9 +15,14 @@ AWS_ACCESS_KEY_ID =
 AWS_SECRET_ACCESS_KEY = 
 
 [facebook.api]
-event_key = 
+api_id = 
+app_secret = 
 
 [elasticsearch]
 host = 
 port = 
 kibana_port = 
+
+[pop3.email]
+gmail_user = 
+gmail_password = 
