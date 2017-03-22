@@ -26,3 +26,10 @@ kibana_port =
 [pop3.email]
 gmail_user = 
 gmail_password = 
+
+[mysql]
+host = 
+port = 
+password = 
+user = 
+database = 
