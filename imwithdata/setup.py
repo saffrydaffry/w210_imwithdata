@@ -22,6 +22,11 @@ setup(name='imwithdata',
           'boto3==1.4.3',
           'retrying==1.3.3',
           'beautifulsoup4==4.5.3',
+          'phonenumbers==8.3.3',
+          'pandas==0.19.2',
+          'editdistance==0.3.1',
+          'spacy==1.7.3',
+          'sunlight==1.2.9'
       ],
       setup_requires=[
           '',
