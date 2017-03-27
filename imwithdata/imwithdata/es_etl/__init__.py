@@ -5,7 +5,7 @@ from datetime import datetime
 import boto3
 from tqdm import tqdm
 
-from imwithdata.imwithdata.es_etl.issues_actions import (
+from imwithdata.es_etl.issues_actions import (
     issues,
     actions
 )
@@ -62,6 +62,12 @@ class TwitterQueryAction(object):
         if n_results > 0:
             print("Writing %s results.\n" % n_results)
             for result in tqdm(results['hits']['hits']):
+                tweet = ""
+                try:
+                    tweet = result['_source']['message']
+                except KeyError:
+                    tweet = result['_source']['text']
+                    
                 row = {'issue': self.issue,
                        'action': self.action,
                        'id': result['_id'],
@@ -71,7 +77,7 @@ class TwitterQueryAction(object):
                        'tweet_user': result['_source']['user'],
                        # TODO: Ross can filter 'message' section of document
                        # parse this bit to pull out address/phone number
-                       'tweet': result['_source']['message']
+                       'tweet': tweet
                        }
 
                 # skip retweets

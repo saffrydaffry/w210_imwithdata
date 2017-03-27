@@ -12,8 +12,8 @@ from datetime import datetime
 from elasticsearch import (
     Elasticsearch
 )
-from imwithdata.imwithdata.es_etl import TwitterQueryAction
-from imwithdata.imwithdata.es_etl.issues_actions import (
+from imwithdata.es_etl import TwitterQueryAction
+from imwithdata.es_etl.issues_actions import (
     issues,
     actions
 )
