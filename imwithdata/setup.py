@@ -17,14 +17,14 @@ setup(name='imwithdata',
       install_requires=[
           'elasticsearch==5.2.0',
           'PyMySQL==0.7.9',
-          'sqlalchemy=1.1.6',
+          'sqlalchemy==1.1.6',
           'tqdm==4.11.2',
           'boto3==1.4.3',
           'retrying==1.3.3',
           'beautifulsoup4==4.5.3',
       ],
       setup_requires=[
-          'pandas=0.19.2=np112py35_1',
+          '',
       ],
       tests_require=[
           'pytest==2.9.2',
