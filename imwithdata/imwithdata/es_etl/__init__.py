@@ -25,7 +25,6 @@ class TwitterQueryAction(object):
         self.line_count = 0
         self.es = es
         self.date = date                            # given date of index being queried
-        self.idx_date = None                        # if no date given, set this variable
         self.outfile = "es_data.csv"
         self.buffer = open(self.outfile, "w")
         self.querytimestamp = datetime.now().isoformat()
@@ -37,7 +36,7 @@ class TwitterQueryAction(object):
 
     @property
     def s3_loc(self):
-        self.key_prefix = "/".join([self.key_prefix, self.date if self.date else self.idx_date])
+        self.key_prefix = "/".join([self.key_prefix, self.date])
         return "/".join([self.key_prefix, self.outfile])
 
     def _write_tweets(self, results):
@@ -67,7 +66,7 @@ class TwitterQueryAction(object):
                     tweet = result['_source']['message']
                 except KeyError:
                     tweet = result['_source']['text']
-                    
+
                 row = {'issue': self.issue,
                        'action': self.action,
                        'id': result['_id'],
@@ -103,9 +102,7 @@ class TwitterQueryAction(object):
             print("Running queries for issue: %s" % self.issue)
 
             if not self.date:
-                self.idx_date = index_.split("-")[1]
-                print("Appending date {idx_date_} to key".format(idx_date_=self.idx_date))
-                self.key_prefix = "/".join([self.key_prefix, self.idx_date])
+                self.date = self.querytimestamp
 
             print("Querying index %s" % index_)
             print(self.query)
@@ -117,12 +114,13 @@ class TwitterQueryAction(object):
 
     def stop(self):
         self.buffer.close()
+        upload_key = self.s3_loc
         print("Uploading {line_count} results to s3://{bucket}/{s3_loc}".format(line_count=self.line_count,
                                                                                 bucket=bucket,
-                                                                                s3_loc=self.s3_loc
+                                                                                s3_loc=upload_key
                                                                                 )
              )
-        s3.upload_file(self.outfile, bucket, "/".join([self.s3_loc
+        s3.upload_file(self.outfile, bucket, "/".join([upload_key
                                                        ])
                        )
         print("Removing local temp file %s" % self.outfile)

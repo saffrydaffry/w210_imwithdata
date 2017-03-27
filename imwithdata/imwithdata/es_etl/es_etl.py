@@ -71,16 +71,12 @@ def main():
 
     q_date = args.date
 
-    if q_date == "all":
-        q_date = None
-        print("Uploading all issue-based indices regardless of date.")
-    else:
-        # check date format
-        try:
-            datetime.strptime(q_date, format)
-            print("Uploading indices created on %s" % q_date)
-        except ValueError:
-            parser.print_help()
+
+    try:
+        datetime.strptime(q_date, format)
+        print("Uploading indices created on %s" % q_date)
+    except ValueError:
+        parser.print_help()
 
     try:
         es = Elasticsearch(
