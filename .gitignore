@@ -3,7 +3,13 @@
 
 # ipython metadata
 *ipynb_checkpoints*
+*.DS_Store
+
+# python stuff
+*.pyc
 
 # data
 *.txt
 *.json
+.idea/
+notebooks/src/
