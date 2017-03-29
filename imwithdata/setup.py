@@ -26,7 +26,9 @@ setup(name='imwithdata',
           'pandas==0.19.2',
           'editdistance==0.3.1',
           'spacy==1.7.3',
-          'sunlight==1.2.9'
+          'sunlight==1.2.9',
+          'textblob==0.12.0',
+          'textblob-aptagger==0.2.0'
       ],
       setup_requires=[
           '',
