@@ -24,11 +24,12 @@ bucket = "mids-capstone-rzst"
 session = boto3.Session(profile_name="berkeley")
 s3 = session.client("s3", "us-west-2")
 
+nlp = spacy.load('en')
 
-
-class TwitterQueryAction(object):
+class ElasticSearchQueryETL(object):
     def __init__(self, es,
-                 date=None):
+                 date=None,
+                 first_match=True):
         self.issue = None                          # Gets defined within the query runs
         self.action=None
         self.firstline = True
@@ -39,7 +40,7 @@ class TwitterQueryAction(object):
         self.outfile = "es_data.csv"
         self.buffer = open(self.outfile, "w")
         self.querytimestamp = datetime.now().isoformat()
-
+        self.FIRST_MATCH = first_match
 
     @property
     def query(self):
@@ -51,161 +52,132 @@ class TwitterQueryAction(object):
         return "/".join([self.key_prefix, self.outfile])
 
     def _write_tweets(self, results):
+        fieldnames_ = ['issue',
+                       'action',
+                       'id',
+                       'es_score',
+                       'tweet_timestamp',
+                       'query_timestamp',
+                       'tweet_user',
+                       'tweet_cities',
+                       'tweet_states',
+                       'tweet_urls',
+                       'tweet_phone_numbers',
+                       'tweet_dates_ref',
+                       'tweet_legislator_names',
+                       'tweet_legislator_handles',
+                       # TODO: Ross to filter 'message' section of document for address
+                       'tweet'
+                       ]
         if self.firstline:
             self.firstline = False
             # TODO: Modify and add sections to match
             # rzst_events table in Drupal MySQL backend.
-            fieldnames = ['issue',
-                          'action',
-                          'id',
-                          'es_score',
-                          'tweet_timestamp',
-                          'query_timestamp',
-                          'tweet_user',
-                          'tweet'
-                          ]
             self.writer = csv.DictWriter(self.buffer,
-                                         fieldnames=fieldnames
+                                         fieldnames=fieldnames_
                                          )
             self.writer.writeheader()
+
+        # instantiate the row to be written as empty dict
+        row = dict.fromkeys(fieldnames_, "")
+
+        # iterate through each tweet
         n_results = len(results['hits']['hits'])
         if n_results > 0:
             print("Writing %s results.\n" % n_results)
             for result in tqdm(results['hits']['hits']):
                 tweet = ""
-                try:
+
+                # potential for two KeyErrors, the second won't be caught
+                # so use if statement instead.
+                if 'message' in result['_source'].keys():
                     tweet = result['_source']['message']
-                except KeyError:
+                elif 'text' in result['_source'].keys():
                     tweet = result['_source']['text']
+                else:
+                    print("issue with document {id}".format(id=result['_id']))
+                    print("From index {issue}-{date}".format(issue=self.issue,
+                                                             date=self.date))
+                    print(result['_source'])
+                    # skip meetup for now
+                    continue
+                # EXTRACT PHONE NUMBER, URL, STATE, CITY, DATE, LEGISLATOR NAMES, AND LEGISLATOR TWITTER HANDLES #
+                # -- Phone Numbers -- #
+                phone_numbers = []
+                if phonenumbers.PhoneNumberMatcher(tweet, "US"):
+                    for match in phonenumbers.PhoneNumberMatcher(tweet, "US"):
+                                phone_numbers.append(phonenumbers.format_number(match.number,
+                                                                                phonenumbers.PhoneNumberFormat.NATIONAL))
+                # -- States -- #
+                states = []
+                if state_regex.match(tweet):
+                    for match in re.findall(state_regex, tweet):
+                        states.append(match)
                 
+                # -- CITIES -- #
+                cities = []
+                if city_regex.match(tweet):
+                    for match in re.findall(city_regex, tweet):
+                        if match != 'White House' and match != 'Liberal' and match != 'Perry' and match != 'Price':
+                            cities.append(match)
                 
-                
-                #### EXTRACT PHONE NUMBER, URL, STATE, CITY, DATE, LEGISLATOR NAMES, AND LEGISLATOR TWITTER HANDLES ####
-                
-                ### PHONE NUMBERS
-                try:
-                    phone_numbers= []
-                    if phonenumbers.PhoneNumberMatcher(tweet, "US"):
-                        for match in phonenumbers.PhoneNumberMatcher(tweet, "US"):
-                                    phone_numbers.append(phonenumbers.format_number(match.number, 
-                                                                                    phonenumbers.PhoneNumberFormat.NATIONAL))
-                    ### IF WE DECIDE WE ONLY WANT ONE PHONE PER RECORD       
-                    #if phone_numbers:
-                        #phone_numbers = phone_numbers[0]
-                        
-                except:
-                    phone_numbers = []
-                    #print 'phone number error'
-                    #print tweet
-                
-                
-                ### STATES
-                try:
-                    states = []
-                    if state_regex.match(tweet):
-                        for match in re.findall(state_regex, tweet):
-                            states.append(match)
-                    
-                    ### IF WE DECIDE WE ONLY WANT ONE STATE PER RECORD       
-                    #if states:
-                        #states = states[0]
-                except:
-                    states = []
-                    #print 'state error'
-                    #print tweet
-                
-                ### CITIES
-                try:
-                    cities = []
-                    if city_regex.match(tweet):
-                        for match in re.findall(city_regex, tweet):
-                            if match != 'White House' and match != 'Liberal' and match != 'Perry' and match != 'Price':
-                                cities.append(match)
-                                
-                    ### IF WE DECIDE WE ONLY WANT ONE CITY PER RECORD       
-                    #if cities:
-                        #cities = cities[0]
-                except:
-                    cities = []
-                    #print 'city error'
-                    #print tweet
-                
-                ### URLS
-                try:
-                    urls = []
-                    if re.findall(web_url_regex,tweet):
-                        urls.append(re.findall(WEB_URL_REGEX,tweet))
-                    
-                    ### IF WE DECIDE WE ONLY WANT ONE URL PER RECORD       
-                    #if urls:
-                        #urls = urls[0]
-                except:
-                    urls = []
-                    #print 'url error'
-                    #print tweet
-                
-                ### DATES
-                try:
-                    dates = []
-                    ### SPACY NLP
-                    doc = nlp(tweet)
-                    ### ITERATING THROUGH ENTITIES FROM SPACY
-                    for ent in doc.ents:
-                        ### EXCLUDE SOME DIRTY DATES FROM TWITTER THAT SPACY MISTAKENLY INCLUDES
-                        if ent.label_ == u'DATE':
-                            if re.findall(date_exclude_regex,ent.text):
-                                pass
-                            elif re.findall(date_include_regex,ent.text) and 'weeks' not in ent.text and 'months' not in ent.text and 'old' not in ent.text:
-                                dates.append(ent.text)
-                                
-                    ### IF WE DECIDE WE ONLY WANT ONE DATE PER RECORD       
-                    #if dates:
-                        #dates = dates[0]
-                                    
-                except:
-                    dates = []
-                    # print 'date error'
-                    # print tweet
-                
-                ### LEGISLATOR NAMES
-                try:
-                    leg_names = []
-                    if leg_name_regex.match(tweet):
-                        for match in re.findall(leg_name_regex, tweet):
-                            leg_names.append(match)                        
-                except:
-                    leg_names = []
-                    # print 'legislator name error'
-                    # print tweet
-                    
-                ### LEGISLATOR TWITTER HANDLES
-                try:
-                    leg_twitter_handles = []
-                    if leg_twitter_regex.match(tweet):
-                        for match in re.findall(leg_twitter_regex, tweet):
-                            leg_twitter_handles.append(match)
-                except:
-                    leg_twitter_handles = []
-                    # print 'legislator twitter handle error'
-                    # print tweet
-                
-                row = {'issue': self.issue,
-                       'action': self.action,
-                       'id': result['_id'],
-                       'es_score': result['_score'],
-                       'tweet_timestamp': result['_source']['@timestamp'],
-                       'query_timestamp': self.querytimestamp,
-                       'tweet_user': result['_source']['user'],
-                       'tweet_cities':cities,
-                       'tweet_states':states,
-                       'tweet_urls':urls,
-                       'tweet_phone_numbers':phone_numbers,
-                       'tweet_dates_ref':dates,
-                       'tweet_legislator_names':leg_names,
-                       'tweet_legislator_handles':leg_twitter_handles,
-                       # TODO: Ross to filter 'message' section of document for address
-                       'tweet': tweet
-                       }
+                # -- URLS -- #
+                urls = []
+                if re.findall(web_url_regex,tweet):
+                    urls.append(re.findall(web_url_regex, tweet))
+
+                # -- DATES -- #
+                dates = []
+                # SPACY NLP
+                doc = nlp(tweet)
+                # ITERATING THROUGH ENTITIES FROM SPACY
+                for ent in doc.ents:
+                    ### EXCLUDE SOME DIRTY DATES FROM TWITTER THAT SPACY MISTAKENLY INCLUDES
+                    if ent.label_ == u'DATE':
+                        if re.findall(date_exclude_regex,ent.text):
+                            pass
+                        elif re.findall(date_include_regex, ent.text) and 'weeks' not in ent.text and 'months' not in ent.text and 'old' not in ent.text:
+                            dates.append(ent.text)
+
+                # -- LEGISLATOR NAMES -- #
+                leg_names = []
+                if leg_name_regex.match(tweet):
+                    for match in re.findall(leg_name_regex, tweet):
+                        leg_names.append(match)
+
+                # -- LEGISLATOR TWITTER HANDLES -- #
+                leg_twitter_handles = []
+                if leg_twitter_regex.match(tweet):
+                    for match in re.findall(leg_twitter_regex, tweet):
+                        leg_twitter_handles.append(match)
+
+                # process if only first item is needed
+                temp_row = {'tweet_cities': cities,
+                            'tweet_states': states,
+                            'tweet_urls': urls,
+                            'tweet_phone_numbers': phone_numbers,
+                            'tweet_dates_ref': dates,
+                            'tweet_legislator_names': leg_names,
+                            'tweet_legislator_handles': leg_twitter_handles
+                            }
+
+                if self.FIRST_MATCH:
+                    temp_row = {key: (value[0] if len(value) > 0 else value)
+                                for key, value in temp_row.items()}
+
+
+                # fill in the values to row
+                row.update({'issue': self.issue,
+                           'action': self.action,
+                           'id': result['_id'],
+                           'es_score': result['_score'],
+                           'tweet_timestamp': result['_source']['@timestamp'],
+                           'query_timestamp': self.querytimestamp,
+                           'tweet_user': result['_source']['user'],
+                           # TODO: Ross to filter 'message' section of document for address
+                           'tweet': tweet
+                       })
+                row.update(temp_row)
 
                 # skip retweets
                 if row['tweet'][:2] == "RT":
@@ -247,7 +219,7 @@ class TwitterQueryAction(object):
                                                                                 bucket=bucket,
                                                                                 s3_loc=upload_key
                                                                                 )
-             )
+              )
         s3.upload_file(self.outfile, bucket, "/".join([upload_key
                                                        ])
                        )

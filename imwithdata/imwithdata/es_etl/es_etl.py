@@ -12,7 +12,7 @@ from datetime import datetime
 from elasticsearch import (
     Elasticsearch
 )
-from imwithdata.es_etl import TwitterQueryAction
+from imwithdata.es_etl import ElasticSearchQueryETL
 from imwithdata.es_etl.issues_actions import (
     issues,
     actions
@@ -93,11 +93,11 @@ def main():
     except ConnectionError:
         raise("Failed to Connect to ElasticSearch on {hostname}".format(hostname=es_creds['host']))
 
-    tq = TwitterQueryAction(es, date=q_date)
+    eq = ElasticSearchQueryETL(es, date=q_date)
 
     for action in actions.keys():
-        tq.run(action)
-    tq.stop()
+        eq.run(action)
+    eq.stop()
 
 
 if __name__ == "__main__":
