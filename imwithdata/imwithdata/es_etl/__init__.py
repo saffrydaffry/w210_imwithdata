@@ -220,8 +220,12 @@ class ElasticSearchQueryETL(object):
                                                                                 s3_loc=upload_key
                                                                                 )
               )
-        s3.upload_file(self.outfile, bucket, "/".join([upload_key
-                                                       ])
-                       )
+        s3.upload_file(self.outfile, bucket, upload_key)
+        response = s3.put_object_acl(ACL='public-read', Bucket='mids-capstone-rzst',Key=upload_key)['ResponseMetadata']
+        if response['HTTPStatusCode'] == 200:
+            print("Successfully set permissions to public-read")
+        else:
+            print("Failed to set permissions for %s" % upload_key)
+
         print("Removing local temp file %s" % self.outfile)
         os.remove(self.outfile)
