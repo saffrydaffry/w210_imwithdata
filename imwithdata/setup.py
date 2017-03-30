@@ -51,6 +51,7 @@ test_tweet = "blah fji hi my name is"
 try:
     tb = Blobber(pos_tagger=PerceptronTagger())
     tagged = tb(test_tweet)
+    print(tagged.tags)
 
 except LookupError:
     print("missing resource")
