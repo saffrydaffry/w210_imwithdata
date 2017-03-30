@@ -230,7 +230,6 @@ issue_tags = {'Healthcare': ['healthcare.gov',
                        '#theresistance',
                        'first+amendment',
                        '1st+amendment'
-                       
                         ]
               }
 

@@ -136,6 +136,10 @@ for tweet in actionability_ranking['tweet'].tolist():
         score -= 20
     if 'nytimes' in tweet.lower():
         score -= 20
+    if '@cnnpolitics' in tweet.lower():
+        score -= 20
+    if '@caretoclick' in tweet.lower():
+        score -= 20
     if '5 things' in tweet.lower():
         score -= 20
     if 'poland' in tweet.lower():
@@ -148,6 +152,34 @@ for tweet in actionability_ranking['tweet'].tolist():
         score -= 20
     if 'austria' in tweet.lower():
         score -= 20
+    if 'india' in tweet.lower():
+        score -= 20
+    if 'france' in tweet.lower():
+        score -= 20
+    if 'clown' in tweet.lower():
+        score -= 20
+    if 'clever app' in tweet.lower():
+        score -= 20
+    if 'new app' in tweet.lower():
+        score -= 20
+    if 'from fox' in tweet.lower():
+        score -= 20
+    if tweet.lower().startswith('new york,'):
+        score -= 20
+    if tweet.lower().startswith('washington,'):
+        score -= 20
+    if tweet.lower().startswith('los angeles,'):
+        score -= 20
+    if tweet.lower().startswith('dallas,'):
+        score -= 20
+    if tweet.lower().startswith('san francisco,'):
+        score -= 20
+    if tweet.lower().startswith('boston,'):
+        score -= 20
+    if tweet.lower().startswith('philadelphia,'):
+        score -= 20
+    if tweet.lower().startswith('miami,'):
+        score -= 20
     if 'hiring' in tweet.lower():
         score -= 20
     if 'ice show' in tweet.lower():
@@ -155,6 +187,20 @@ for tweet in actionability_ranking['tweet'].tolist():
     if 'ice cream' in tweet.lower():
         score -= 20
     if 'ice cold' in tweet.lower():
+        score -= 20
+    if 'break the ice' in tweet.lower():
+        score -= 20
+    if '#MAGA' in tweet.lower():
+        score -= 20
+    if 'construction technology' in tweet.lower():
+        score -= 20
+    if '#retweet' in tweet.lower():
+        score -= 20
+    if 'daesh' in tweet.lower():
+        score -= 20
+    if 'spicy' in tweet.lower():
+        score -= 20
+    if 'LOL' in tweet:
         score -= 20
     if 'snow' in tweet.lower():
         score -= 20
