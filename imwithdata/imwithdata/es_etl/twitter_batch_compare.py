@@ -13,7 +13,7 @@ from imwithdata.es_etl.issues_actions import (
 
 ### Import dataset: SHOULD ALREADY BE DOWNLOADED FROM S3 BUCKET
 ### CAN REPLACE THIS WITH NEW CODE THAT CREATES A PANDAS DATAFRAME DIRECTLY WITHOUT DOWNLOADING THE CSV
-full_dataset = pd.read_csv('~/w210_imwithdata/data/bucket_stuff/es_data.csv')
+actionability_ranking = pd.read_csv('~/w210_imwithdata/data/bucket_stuff/es_data.csv')
 
 ### LOAD POS TAGGER TO HELP WITH ACTIONABILITY SCORING
 tb = Blobber(pos_tagger=PerceptronTagger())
@@ -26,7 +26,7 @@ good_verbs = ['VB','VBG','VBP','JJ']
 
 
 ### Part of speech tag each tweet
-for tweet in full_dataset['tweet'].tolist():
+for tweet in actionability_ranking['tweet'].tolist():
     tagged = tb(tweet.lower())
     tag_list = [x[1] for x in tagged.tags]
     score = 0
