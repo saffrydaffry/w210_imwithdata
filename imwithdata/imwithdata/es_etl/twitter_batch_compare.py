@@ -146,6 +146,8 @@ for tweet in actionability_ranking['tweet'].tolist():
         score -= 20
     if 'czech' in tweet.lower():
         score -= 20
+    if 'austria' in tweet.lower():
+        score -= 20
     if 'hiring' in tweet.lower():
         score -= 20
     if 'ice show' in tweet.lower():
