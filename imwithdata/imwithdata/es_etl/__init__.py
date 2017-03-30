@@ -19,10 +19,20 @@ from imwithdata.es_etl.issues_actions import (
     leg_name_regex,
     leg_twitter_regex
 )
+from imwithdata.utils import get_ini_vals
+# Configs form .ini file
+# .ini location
+config_file = os.path.join(os.pardir,
+                           'config',
+                           'config.ini'
+                           )
 
+aws_creds = get_ini_vals(config_file, 'aws.creds')
 bucket = "mids-capstone-rzst"
-session = boto3.Session(profile_name="berkeley")
-s3 = session.client("s3", "us-west-2")
+s3 = boto3.client("s3", "us-west-2",
+                  aws_access_key_id=aws_creds['AWS_ACCESS_KEY_ID'],
+                  aws_secret_access_key=aws_creds['AWS_SECRET_ACCESS_KEY']
+                  )
 
 nlp = spacy.load('en')
 

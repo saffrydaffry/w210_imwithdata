@@ -36,6 +36,26 @@ setup(name='imwithdata',
       tests_require=[
           'pytest==2.9.2',
       ],
-      packages=['imwithdata', 'imwithdata.es_etl'],
+      packages=['imwithdata', 'imwithdata.es_etl', 'imwithdata.utils'],
       zip_safe=False
       )
+
+print("Testing nltk model after install")
+import nltk
+
+from textblob import Blobber
+from textblob_aptagger import PerceptronTagger
+
+
+test_tweet = "blah fji hi my name is"
+try:
+    tb = Blobber(pos_tagger=PerceptronTagger())
+    tagged = tb(test_tweet)
+
+except LookupError:
+    print("missing resource")
+    if nltk.download('punkt'):
+        print("Successfully installed")
+    else:
+        print("Failed")
+

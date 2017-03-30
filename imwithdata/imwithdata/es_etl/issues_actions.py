@@ -248,7 +248,7 @@ states = ['IA', 'KS', 'UT', 'VA', 'NC', 'NE', 'SD', 'AL', 'ID', 'FM', 'DE', 'AK'
                           'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
 state_regex = re.compile(r'\b(' + '|'.join(states) + r')\b')
 
-cities = pd.read_csv(os.path.join(os.pardir, 'data/static_data', 'Top5000Population.csv'))
+cities = pd.read_csv(os.path.join(os.pardir, os.pardir,'data/static_data', 'Top5000Population.csv'))
 city_list = list(cities['city'].str.rstrip())
 city_regex = re.compile(r'\b(' + '|'.join(city_list) + r')\b', re.IGNORECASE)
 
