@@ -180,6 +180,12 @@ for tweet in actionability_ranking['tweet'].tolist():
         score -= 20
     if tweet.lower().startswith('miami,'):
         score -= 20
+    if 'stupid' in tweet.lower():
+        score -= 20
+    if 'studidity' in tweet.lower():
+        score -= 20
+    if 'delhi' in tweet.lower():
+        score -= 20
     if 'hiring' in tweet.lower():
         score -= 20
     if 'ice show' in tweet.lower():
@@ -192,6 +198,8 @@ for tweet in actionability_ranking['tweet'].tolist():
         score -= 20
     if '#MAGA' in tweet.lower():
         score -= 20
+    if 'merkel' in tweet.lower():
+        score -= 20
     if 'construction technology' in tweet.lower():
         score -= 20
     if '#retweet' in tweet.lower():
@@ -199,6 +207,8 @@ for tweet in actionability_ranking['tweet'].tolist():
     if 'daesh' in tweet.lower():
         score -= 20
     if 'spicy' in tweet.lower():
+        score -= 20
+    if 'hockey' in tweet.lower():
         score -= 20
     if 'LOL' in tweet:
         score -= 20
