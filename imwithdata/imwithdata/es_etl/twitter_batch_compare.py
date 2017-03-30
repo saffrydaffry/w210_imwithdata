@@ -26,7 +26,7 @@ good_verbs = ['VB','VBG','VBP','JJ']
 
 
 ### Part of speech tag each tweet
-for tweet in actionability_ranking['tweet'].tolist():
+for tweet in full_dataset['tweet'].tolist():
     tagged = tb(tweet.lower())
     tag_list = [x[1] for x in tagged.tags]
     score = 0
