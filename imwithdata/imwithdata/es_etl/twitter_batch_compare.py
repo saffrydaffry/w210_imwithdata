@@ -284,7 +284,7 @@ def process_twitter(actionability_ranking: pd.DataFrame):
     ### FOR DUPLICATES, WE'LL TAKE THE MORE ACTIONABLE/RELEVANT OF THE TWO
     delete_indices = []
 
-    for (i, j), v in distance_dict.iteritems():
+    for (i, j), v in distance_dict.items():
         if filtered_score_list[i] >= filtered_score_list[j]:
             delete_indices.append(j)
         else:
