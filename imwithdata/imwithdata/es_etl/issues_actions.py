@@ -132,7 +132,6 @@ issue_tags = {'Healthcare': ['healthcare.gov',
                            '#immigrant',
                            '#muslimban',
                            '#nobannowall',
-                           'sanctuary+cities',
                            'citizenship+test',
                            'religious+test'
 
@@ -260,7 +259,7 @@ dates_dont_include = ['year old','old','decades', 'year olds', 'ago', 'ryear', '
 dates_include = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December', '1/', '2/', '3/', '4/', '5/', '6/', '7/', '8/', '9/', '10/', '11/', '12/', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', '2017/', '2018/', '2019/', '01/', '02/', '03/', '04/', '05/', '06/', '07/', '08/', '09/', '10/', '11/', '12/', '7am', '8am', '9am', '10am', '11am', '12am', '1pm', '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm', '10pm', '11pm', '12am', '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM', '10:00 PM', '11:00 PM', '12:00 AM', '7:00AM', '8:00AM', '9:00AM', '10:00AM', '11:00AM', '12:00PM', '1:00PM', '2:00PM', '3:00PM', '4:00PM', '5:00PM', '6:00PM', '7:00PM', '8:00PM', '9:00PM', '10:00PM', '11:00PM', '12:00AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM', '12 AM', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Today', 'Tomorrow', 'Day after Tomorrow', 'Day after ', 'Everyday this week', 'Every day this week', 'Everyday this month', 'every day this month', 'next 2', 'next 3', 'next 4', 'next 5', 'next 6', 'next 7', 'next 8', 'next 9', 'next 10', 'this week', 'next week', 'two weeks', 'three weeks', 'four weeks', '2 weeks', '3 weeks', '4 weeks', 'this weekend', 'next Monday', 'next Tuesday', 'next Wednesday', 'next Thursday', 'next Friday', 'next Saturday', 'next Sunday', 'this Mon', 'this Tue', 'this Wed', 'this Thur', 'this Fri', 'This Sat', 'This Sun', 'ThisWeek']
 
 
-profanity = ['anal', 'anus','ass','asshole','asshole.' 'ballsack', 'blowjob', 'blow job', 'boner', 'clitoris', 'cock', 'cunt', 'dick', 'dildo', 'dyke', 'fag', 'fuck', 'jizz', 'labia', 'muff', 'nigger', 'nigga','nigg', 'penis', 'piss', 'pussy', 'scrotum', 'sex', 'shit', 'slut', 'smegma', 'spunk', 'twat', 'vagina', 'wank', 'whore']
+profanity = ['anal', 'anus','ass','asshole','asshole.','ballsack', 'blowjob', 'blow job', 'boner', 'clitoris', 'cock', 'cunt', 'dick', 'dildo', 'dyke', 'fag', 'fuck', 'jizz', 'labia', 'muff', 'nigger', 'nigga','nigg', 'penis', 'piss', 'pussy', 'scrotum', 'sex', 'shit', 'slut', 'smegma', 'spunk', 'twat', 'vagina', 'wank', 'whore']
 profanity_regex = re.compile(r'(' + '|'.join(profanity) + r')', re.IGNORECASE)
 
 date_include_regex = re.compile(r'\b(' + '|'.join(dates_include) + r')', re.IGNORECASE)
