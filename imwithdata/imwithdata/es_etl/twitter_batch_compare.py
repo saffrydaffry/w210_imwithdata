@@ -197,12 +197,18 @@ def process_twitter(actionability_ranking: pd.DataFrame):
             score -= 20
         if 'ice cream' in tweet.lower():
             score -= 20
+        if 'icecream' in tweet.lower():
+            score -= 20
+        if 'avalanche' in tweet.lower():
+            score -= 20
         if 'ice cold' in tweet.lower():
             score -= 20
         if 'snow' in tweet.lower():
             score -= 20
         if 'alex jones' in tweet.lower():
             score -= 1000
+        if 'performance' in tweet.lower():
+            score -= 20
         if re.findall(profanity_regex, tweet.lower()):
             score -= 50
 
@@ -261,7 +267,7 @@ def process_twitter(actionability_ranking: pd.DataFrame):
 
     ### FILTER THE DF BY TOTAL SCORE AND ELASTIC SEARCH RELEVANCE
     filtered_data = actionability_ranking.loc[
-        (actionability_ranking['total_score'] > 8.5) | (actionability_ranking['es_score'] > 7.0)]
+        (actionability_ranking['total_score'] > 8.5) | (actionability_ranking['es_score'] > 10.0)]
     filtered_tweet_list = filtered_data['tweet'].tolist()
     filtered_score_list = filtered_data['total_score'].tolist()
     filtered_es_score_list = filtered_data['es_score'].tolist()
@@ -272,14 +278,13 @@ def process_twitter(actionability_ranking: pd.DataFrame):
 
     for i, tweet in enumerate(filtered_tweet_list):
         for j, tweet2 in enumerate(filtered_tweet_list):
-            if filtered_score_list[i] > 7.5 and filtered_es_score_list[i] > 5.5:
-                tweet_ids = tuple(sorted([i, j]))
-                if i == j:
-                    pass
-                else:
-                    distance = editdistance.eval(tweet, tweet2)
-                    if distance <= 60:
-                        distance_dict[tweet_ids] = distance
+            tweet_ids = tuple(sorted([i, j]))
+            if i == j:
+                pass
+            else:
+                distance = editdistance.eval(tweet, tweet2)
+                if distance <= 60:
+                    distance_dict[tweet_ids] = distance
 
     ### FOR DUPLICATES, WE'LL TAKE THE MORE ACTIONABLE/RELEVANT OF THE TWO
     delete_indices = []
@@ -301,6 +306,8 @@ def process_twitter(actionability_ranking: pd.DataFrame):
                                 u'tweet_urls', u'tweet_phone_numbers', u'tweet_dates_ref',
                                 u'tweet_legislator_names', u'tweet_legislator_handles']]
     
+   
+    final_data.to_csv('/Users/brosskatz/PycharmProjects/rzst/w210_imwithdata/imwithdata/data/static_data/final_data_example.csv')
 
     return final_data
 

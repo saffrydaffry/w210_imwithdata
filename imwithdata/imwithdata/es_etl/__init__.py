@@ -143,11 +143,11 @@ class ElasticSearchQueryETL(object):
                 # ITERATING THROUGH ENTITIES FROM SPACY
                 for ent in doc.ents:
                     ### EXCLUDE SOME DIRTY DATES FROM TWITTER THAT SPACY MISTAKENLY INCLUDES
-                    if ent.label_ == u'DATE':
-                        if re.findall(date_exclude_regex,ent.text):
-                            pass
-                        elif re.findall(date_include_regex, ent.text) and 'weeks' not in ent.text and 'months' not in ent.text and 'old' not in ent.text:
+                    if ent.label_ == 'DATE':
+                        if re.findall(date_include_regex, ent.text) and 'weeks' not in ent.text and 'months' not in ent.text and 'old' not in ent.text:
                             dates.append(ent.text)
+                        #re.findall(date_exclude_regex,ent.text)
+                        
 
                 # -- LEGISLATOR NAMES -- #
                 leg_names = []
