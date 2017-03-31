@@ -157,7 +157,7 @@ def process_twitter(actionability_ranking: pd.DataFrame):
             score -= 20
         if 'News' in tweet:
             score -= 10
-        if 'Daily Beast' in tweet.lower():
+        if 'daily beast' in tweet.lower():
             score -= 20
         if '#design' in tweet.lower():
             score -= 20
@@ -300,6 +300,7 @@ def process_twitter(actionability_ranking: pd.DataFrame):
                                 u'query_timestamp', u'tweet_user', u'tweet_cities', u'tweet_states',
                                 u'tweet_urls', u'tweet_phone_numbers', u'tweet_dates_ref',
                                 u'tweet_legislator_names', u'tweet_legislator_handles']]
+    
 
     return final_data
 
