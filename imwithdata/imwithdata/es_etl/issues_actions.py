@@ -265,6 +265,8 @@ profanity_regex = re.compile(r'(' + '|'.join(profanity) + r')', re.IGNORECASE)
 date_include_regex = re.compile(r'(' + '|'.join(dates_include) + r')', re.IGNORECASE)
 date_exclude_regex = re.compile(r'^(' + '|'.join(dates_dont_include) + r')', re.IGNORECASE)
 
+time_regex = re.compile(r'\d{1,2}(?:(?:am|pm)|(?::\d{1,2})(?:am|pm)?)', re.IGNORECASE)
+
 
 #### PULL LEGISLATORS IN OFFICE
 sunlight.config.API_KEY = 'thisisakey'
