@@ -8,6 +8,7 @@ import os
 import re
 
 from sunlight import congress
+from imwithdata import PROJECT_ROOT
 
 issues = ['civil_right',
           'healthcare',
@@ -234,20 +235,23 @@ issue_tags = {'Healthcare': ['healthcare.gov',
               }
 
 states = ['IA', 'KS', 'UT', 'VA', 'NC', 'NE', 'SD', 'AL', 'ID', 'FM', 'DE', 'AK', 'CT', 'PR', 'NM', 'MS',  
-                          'CO', 'NJ', 'FL', 'MN', 'VI', 'NV', 'AZ', 'WI', 'ND', 'PA', 'OK', 'KY', 'RI', 'NH', 'MO', 'ME', 'VT', 
-                          'GA', 'AS', 'NY', 'CA', 'HI', 'IL', 'TN', 'MA', 'OH', 'MD', 'MI', 'WY', 'WA', 'OR', 'MH', 'SC',
-                          'Ia','Ks','Ut','Va','Nc','Ne','Sd','De','Ak','Ct','Nj','Fl','Mn','Vi','Nv','Az','Wi','Pa',
-                          'Vt','Ga','Ny','Ca','Il','Tn','Md','Wy','Wa','Mh','Sc',
-                          'IN', 'LA', 'MP', 'DC', 'AR', 'WV', 'TX','Alabama', 'Alaska', 'Arizona', 'Arkansas', 
-                          'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 
-                          'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 
-                          'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 
-                          'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 
-                          'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 
-                          'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
-state_regex = re.compile(r'\b(' + '|'.join(states) + r')', re.IGNORECASE)
+          'CO', 'NJ', 'FL', 'MN', 'VI', 'NV', 'AZ', 'WI', 'ND', 'PA', 'OK', 'KY', 'RI', 'NH', 'MO', 'ME', 'VT',
+          'GA', 'AS', 'NY', 'CA', 'HI', 'IL', 'TN', 'MA', 'OH', 'MD', 'MI', 'WY', 'WA', 'OR', 'MH', 'SC',
+          'Ia', 'Ks', 'Ut', 'Va', 'Nc', 'Ne', 'Sd', 'De', 'Ak', 'Ct', 'Nj', 'Fl', 'Mn', 'Vi', 'Nv', 'Az', 'Wi', 'Pa',
+          'Vt', 'Ga', 'Ny', 'Ca', 'Il', 'Tn', 'Md', 'Wy', 'Wa', 'Mh', 'Sc',
+          'IN', 'LA', 'MP', 'DC', 'AR', 'WV', 'TX','Alabama', 'Alaska', 'Arizona', 'Arkansas',
+          'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
+          'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts',
+          'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+          'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon',
+          'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah',
+          'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
 
-cities = pd.read_csv(os.path.join(os.pardir, os.pardir,'data/static_data', 'Top5000Population.csv'))
+state_regex = re.compile(r'\b(' + '|'.join(states) + r')', re.IGNORECASE)
+cities = pd.read_csv(os.path.join(PROJECT_ROOT,
+                                  'data',
+                                  'Top5000Population.csv')
+                     )
 city_list = list(cities['city'].str.rstrip())
 city_regex = re.compile(r'\b(' + '|'.join(city_list) + r')\b',re.IGNORECASE)
 

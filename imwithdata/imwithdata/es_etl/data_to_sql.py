@@ -6,34 +6,26 @@ Clean data for input into Drupal Table.
 """
 
 import pandas as pd
-from sqlalchemy import create_engine
 import sqlalchemy
 import pandas as pd
-from configparser import ConfigParser
 import os
 import spacy
-nlp = spacy.load('en')
 import re
 import phonenumbers
 
+from sqlalchemy import create_engine
 from imwithdata.es_etl.issues_actions import (
-    issues,
-    actions,
     state_regex,
     city_regex,
     web_url_regex,
     date_include_regex,
-    date_exclude_regex,
     leg_name_regex,
     leg_twitter_regex
 )
+from imwithdata.utils import get_ini_vals
 
 time_regex = re.compile(r'\d{1,2}(?:(?:am|pm)|(?::\d{1,2})(?:am|pm)?)', re.IGNORECASE)
-
-def get_ini_vals(ini_file, section):
-    config = ConfigParser()
-    config.read(ini_file)
-    return config[section]
+nlp = spacy.load('en')
 
 
 #### THIS IS THE FUNCTION TO IMPORT
@@ -46,21 +38,22 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
     to_existing_data: Tells Pandas whether to 'replace', 'append',or 'fail' if the table exists. We will only use 'replace' or 'append'
     """
     
-    config_file = os.path.join(os.pardir,'config','config.ini')
+    config_file = os.path.join(os.pardir, 'config', 'config.ini')
 
     mysql_creds = get_ini_vals(config_file, 'mysql')
     
-    engine = create_engine("""mysql+pymysql://{user}:{password}@{host}:{port}/{db}""".format(user=mysql_creds['user'],
-                                                                                 password=mysql_creds['password'],
-                                                                                 host=mysql_creds['host'],
-                                                                                 port=mysql_creds['port'],
-                                                                                 db=mysql_creds['database']
-                                                                                )
-                      )
+    engine = create_engine(
+        """mysql+pymysql://{user}:{password}@{host}:{port}/{db}""".format(user=mysql_creds['user'],
+                                                                          password=mysql_creds['password'],
+                                                                          host=mysql_creds['host'],
+                                                                          port=mysql_creds['port'],
+                                                                          db=mysql_creds['database']
+                                                                          )
+                    )
     
     conn = engine.connect()
     
-    actions = output_data_frame.sort('total_score',ascending=[0])
+    actions = output_data_frame.sort('total_score', ascending=[0])
     
     if data_type == 'twitter':
         
@@ -102,7 +95,8 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
             doc = nlp(tweet)
             all_dates = [doc.text for doc in doc.ents if doc.label_ == 'DATE']
             date_matches = re.findall(date_include_regex, ' '.join(all_dates))
-            ### EXCLUDE SOME DIRTY DATES FROM TWITTER THAT SPACY MISTAKENLY INCLUDES    
+
+            ### EXCLUDE SOME DIRTY DATES FROM TWITTER THAT SPACY MISTAKENLY INCLUDES
             if date_matches:
                 date = all_dates[0]
             dates.append(date)
@@ -182,7 +176,10 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
                          'query_date':query_timestamp_list
                         })
             
-            prepped_to_sql.to_sql('rzst_action',conn,if_exists=to_existing_data,index=False)
+            prepped_to_sql.to_sql('rzst_action',
+                                  conn,
+                                  if_exists=to_existing_data,
+                                  index=False)
 
     
     

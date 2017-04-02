@@ -37,6 +37,7 @@ setup(name='imwithdata',
           'pytest==2.9.2',
       ],
       packages=['imwithdata', 'imwithdata.es_etl', 'imwithdata.utils'],
+      data_files=[('data', ['data/static_data/Top5000Population.csv'])],
       zip_safe=False
       )
 
