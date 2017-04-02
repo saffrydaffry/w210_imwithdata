@@ -1,0 +1,1 @@
+def data_to_sql(output_data_frame, data_type = 'Twitter', to_existing_data = 'Append')

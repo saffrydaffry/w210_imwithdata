@@ -189,6 +189,8 @@ def process_twitter(actionability_ranking: pd.DataFrame):
             score -= 20
         if 'czech' in tweet.lower():
             score -= 20
+        if 'egypt' in tweet.lower():
+            score -= 20
         if 'austria' in tweet.lower():
             score -= 20
         if 'hiring' in tweet.lower():
@@ -196,6 +198,12 @@ def process_twitter(actionability_ranking: pd.DataFrame):
         if 'ice show' in tweet.lower():
             score -= 20
         if 'ice cream' in tweet.lower():
+            score -= 20
+        if 'secure border' in tweet.lower():
+            score -= 20
+        if 'hire thousands' in tweet.lower():
+            score -= 20
+        if 'demand congress hire' in tweet.lower():
             score -= 20
         if 'icecream' in tweet.lower():
             score -= 20
