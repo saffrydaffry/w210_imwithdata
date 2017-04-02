@@ -315,7 +315,7 @@ def process_twitter(actionability_ranking: pd.DataFrame):
                                 u'tweet_legislator_names', u'tweet_legislator_handles']]
     
    
-    #final_data.to_csv('/Users/brosskatz/PycharmProjects/rzst/w210_imwithdata/imwithdata/data/static_data/final_data_example.csv')
+    final_data.to_csv('/Users/brosskatz/PycharmProjects/rzst/w210_imwithdata/imwithdata/data/static_data/final_data_example.csv')
 
     return final_data
 
