@@ -205,6 +205,8 @@ def process_twitter(actionability_ranking: pd.DataFrame):
             score -= 20
         if 'demand congress hire' in tweet.lower():
             score -= 20
+        if 'illegals' in tweet.lower():
+            score -= 20
         if 'icecream' in tweet.lower():
             score -= 20
         if 'avalanche' in tweet.lower():

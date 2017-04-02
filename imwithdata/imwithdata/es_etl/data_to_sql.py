@@ -35,7 +35,16 @@ def get_ini_vals(ini_file, section):
     config.read(ini_file)
     return config[section]
 
+
+#### THIS IS THE FUNCTION TO IMPORT
 def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'append'):
+    """
+    Function takes processed pandas dataframe from s3 and pushes to SQL. config.ini must have [mysql] credentials for the Drupal database in order to work.
+    
+    output_data_frame: Function takes output_data_frame from twitter_batch_compare.py or similar 
+    data_type: Indicates how the data should be processed/structured and where it should be located in Drupal
+    to_existing_data: Tells Pandas whether to 'replace', 'append',or 'fail' if the table exists. We will only use 'replace' or 'append'
+    """
     
     config_file = os.path.join(os.pardir,'config','config.ini')
 
@@ -172,7 +181,7 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
                          'query_date':query_timestamp_list
                         })
             
-            prepped_to_sql.to_sql('rzst_action',conn,if_exists='append',index=False)
+            prepped_to_sql.to_sql('rzst_action',conn,if_exists=to_existing_data,index=False)
 
     
     
