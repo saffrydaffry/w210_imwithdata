@@ -39,7 +39,7 @@ def get_ini_vals(ini_file, section):
 #### THIS IS THE FUNCTION TO IMPORT
 def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'append'):
     """
-    Function takes processed pandas dataframe from s3 and pushes to SQL. config.ini must have [mysql] credentials for the Drupal database in order to work.
+    Function takes processed pandas dataframe and pushes to SQL. config.ini must have [mysql] credentials for the Drupal database in order to work.
     
     output_data_frame: Function takes output_data_frame from twitter_batch_compare.py or similar 
     data_type: Indicates how the data should be processed/structured and where it should be located in Drupal
@@ -104,7 +104,7 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
             date_matches = re.findall(date_include_regex, ' '.join(all_dates))
             ### EXCLUDE SOME DIRTY DATES FROM TWITTER THAT SPACY MISTAKENLY INCLUDES    
             if date_matches:
-                date = date_matches[0]
+                date = all_dates[0]
             dates.append(date)
 
             times = re.findall(time_regex,tweet)
@@ -177,6 +177,7 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
                          'city':cities,
                          'state':states,
                          'phone_number': phone_numbers,
+                         'date_of_action': dates,
                          'announced_date': tweet_timestamp_list,
                          'query_date':query_timestamp_list
                         })
