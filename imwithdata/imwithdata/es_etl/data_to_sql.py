@@ -79,6 +79,7 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
         legislator_handles = []
         phone_numbers = []
         titles = []
+        all_urls = []
 
         for i, tweet in enumerate(tweet_list):
             date = ''
@@ -102,6 +103,7 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
             dates.append(date)
 
             times = re.findall(time_regex,tweet)
+            times = list(set(times))
             if times:
                 start_time = times[0]
             if len(times) > 1:
@@ -143,14 +145,26 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
                     legislator_handle = '; '.join(tweet_leg_handles)
             legislator_handles.append(legislator_handle)
 
-            if phonenumbers.PhoneNumberMatcher(tweet, "US"):
-                for i,match in enumerate(phonenumbers.PhoneNumberMatcher(tweet, "US")):
-                    if i == 0:  
-                        phone_number = phonenumbers.format_number(match.number,
-                                                                    phonenumbers.PhoneNumberFormat.NATIONAL)
-            phone_numbers.append(phone_number)
-
+            phone_numbers = ''
+                phone_matches = phonenumbers.PhoneNumberMatcher(tweet, "US")
+                if phone_matches:
+                    phone_matches = list(set(phone_matches))
+                    if len(phone_matches) == 1:  
+                        phone_number = phonenumbers.format_number(match.number,phonenumbers.PhoneNumberFormat.NATIONAL)
+                    elif len(phone_matches) > 1:
+                        phone_number = '; '.join(matches)
+  
+            urls = ''
             tweet_urls = re.findall(web_url_regex,tweet)
+            if tweet_urls:
+                tweet_urls = list(set(tweet_urls))
+                if len(tweet_urls) == 1:
+                    urls = tweet_urls[0]
+                else:
+                    urls = '; '.join(tweet_urls)
+            all_urls.append(urls)
+
+
             title = tweet
             if tweet_urls:
                 for urly in tweet_urls:
@@ -171,10 +185,12 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
                          'city':cities,
                          'state':states,
                          'phone_number': phone_numbers,
+                         'urls': [url.encode('utf-8') for url in all_urls],
                          'date_of_action': dates,
                          'announced_date': tweet_timestamp_list,
                          'query_date':query_timestamp_list
                         })
+
             
             prepped_to_sql.to_sql('rzst_action',
                                   conn,
