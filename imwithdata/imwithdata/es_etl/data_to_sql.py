@@ -64,7 +64,7 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
 
         es_score_list = actions['es_score'].tolist()
         total_score_list = actions['total_score'].tolist()
-        tweet_list = actions['tweet'].tolist()
+        tweet_list = [tweet.capitalize() if tweet.isupper() else tweet for tweet in actions['tweet'].tolist()]
         tweet_timestamp_list = actions['tweet_timestamp'].tolist()
         query_timestamp_list = actions['query_timestamp'].tolist()
         user_list = actions['tweet_user'].tolist()
@@ -171,8 +171,37 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
                     title = title.replace(urly,'')
             titles.append(title)
         
+        city_states = []
         
-            prepped_to_sql = pd.DataFrame(
+        #### THIS CODE DOES NOT ITERATE OVER EACH TWEET
+        #### IT UTILIZES THE CITIES LIST CREATED ABOVE
+        #### TO CREATE A CITY, STATE LIST
+
+        for i, city in enumerate(cities):
+            city_state = ''
+            state = states[i]
+            if city != '':
+                if state == '':
+                    city_state = city
+                elif state != '':
+                    city_state = '; '.join(list(set([cit + ', ' + state.split('; ')[0] for cit in city.split('; ')])))
+                else:
+                    city_state = city
+            else:
+                if state == city:
+                    city_state = city
+                elif state != '':
+                    city_state = state
+
+            if city_state == 'Washington, Washington':
+                city_state = 'Washington, DC'
+            if city_state == 'Mobile':
+                city_state = ''
+            city_states.append(city_state)
+        
+        ### SEND DATA TO SQL
+        
+        prepped_to_sql = pd.DataFrame(
                         {'id': id_list,
                          'title': [title.encode('utf-8') for title in titles],
                          'description': [tweet.encode('utf-8') for tweet in tweet_list],
@@ -184,6 +213,7 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
                          'legislator_twitter': legislator_handles,
                          'city':cities,
                          'state':states,
+                         'city_state':city_states,
                          'phone_number': phone_numbers,
                          'urls': [url.encode('utf-8') for url in all_urls],
                          'date_of_action': dates,
@@ -191,11 +221,44 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
                          'query_date':query_timestamp_list
                         })
 
-            
-            prepped_to_sql.to_sql('rzst_action',
-                                  conn,
-                                  if_exists=to_existing_data,
-                                  index=False)
 
-    
+        prepped_to_sql.to_sql('rzst_action',
+                              conn,
+                              if_exists=to_existing_data,
+                              index=False)
+
+    elif data_type == 'legislators':
+        
+        if isinstance(output_data_frame, pd.DataFrame):
+            legislator_df = output_data_frame
+        else:
+            legislator_df = pd.DataFrame(output_data_frame)
+        
+        final_legislator_df = legislator_df[['title','first_name','last_name','state','state_name','party','website',
+                                     'phone','oc_email','contact_form']]
+        
+        final_legislator_df.sort_values(['state_name'], ascending=[ True],inplace=True)
+        
+        final_legislator_df.to_sql('rzst_legislators',conn,if_exists='replace',index=False)
+        
+        
+    elif data_type == 'townhalls':
+        if isinstance(output_data_frame, pd.DataFrame):
+            townhalls_df = output_data_frame
+        else:
+            townhalls_df = pd.DataFrame(output_data_frame)
+            
+        townhalls['event_title'] = townhalls['event_legislator'] + ' ' + townhalls['event_meeting_type']
+        
+        townhalls = townhalls[['event_title',
+                       'event_description',
+                       'event_location',
+                       'event_date',
+                       'event_time',
+                       'event_url',
+                       'event_related_state',
+                       'event_legislator',
+                       'event_meeting_type'
+                      ]]
+        townhalls.to_sql('rzst_events',conn,if_exists=to_existing_data,index=False)
     
