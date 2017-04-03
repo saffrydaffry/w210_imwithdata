@@ -234,26 +234,29 @@ issue_tags = {'Healthcare': ['healthcare.gov',
                         ]
               }
 
-states = ['IA', 'KS', 'UT', 'VA', 'NC', 'NE', 'SD', 'AL', 'ID', 'FM', 'DE', 'AK', 'CT', 'PR', 'NM', 'MS',  
-          'CO', 'NJ', 'FL', 'MN', 'VI', 'NV', 'AZ', 'WI', 'ND', 'PA', 'OK', 'KY', 'RI', 'NH', 'MO', 'ME', 'VT',
-          'GA', 'AS', 'NY', 'CA', 'HI', 'IL', 'TN', 'MA', 'OH', 'MD', 'MI', 'WY', 'WA', 'OR', 'MH', 'SC',
-          'Ia', 'Ks', 'Ut', 'Va', 'Nc', 'Ne', 'Sd', 'De', 'Ak', 'Ct', 'Nj', 'Fl', 'Mn', 'Vi', 'Nv', 'Az', 'Wi', 'Pa',
-          'Vt', 'Ga', 'Ny', 'Ca', 'Il', 'Tn', 'Md', 'Wy', 'Wa', 'Mh', 'Sc',
-          'IN', 'LA', 'MP', 'DC', 'AR', 'WV', 'TX','Alabama', 'Alaska', 'Arizona', 'Arkansas',
-          'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
-          'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts',
-          'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-          'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon',
-          'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah',
-          'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
+states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas','District of Columbia','California', 'Colorado', 
+          'Connecticut', 'Delaware', 'Florida', 'Georgia', 
+          'Hawaii', 'Idaho','Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 
+          'Massachusetts','Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 
+          'New Hampshire','New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 
+          'Oregon','Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah',
+          'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming','IA', 'KS', 'UT', 
+          'VA', 'NC', 'NE', 'SD', 'AL', 'ID', 'FM', 'DE', 'AK', 'Conn', 'NM', 'MS',  
+          'CO', 'NJ', 'FL', 'MN', 'NV', 'AZ', 'WI', 'ND', 'OK', 'KY', 'RI', 'NH', 'MO', 'ME', 'VT',
+          'GA', 'NY', 'CA', 'HI', 'IL', 'TN', 'Mass', 'OH', 'MD', 'MI', 'WY', 'WA', 'SC',
+          'IN', 'LA', 'DC', 'AR', 'WV', 'TX','Minn','Ark','Ind','D\.C\.',
+          'Mich','Mizz','Nev','Okl','Penn','S\. Carolina','N\. Carolina','S Carolina','N Carolina','Tenn','Tex']
 
-state_regex = re.compile(r'\b(' + '|'.join(states) + r')', re.IGNORECASE)
+state_regex = re.compile(r'(' + '|\\b'.join(states) + '|' + '|'.join([state + '\\b' for state in states])  + r')')
 cities = pd.read_csv(os.path.join(PROJECT_ROOT,
                                   'data',
                                   'Top5000Population.csv')
                      )
-city_list = list(cities['city'].str.rstrip())
-city_regex = re.compile(r'\b(' + '|'.join(city_list) + r')\b',re.IGNORECASE)
+city_list = list(set(list(cities['city'].str.rstrip())))
+state_list = list(cities['state'].str.rstrip())
+city_state_list = [city + '+, ' + states[i] for i, city in enumerate(city_list)]
+city_regex = re.compile(r'\b(' + '|'.join(city_state_list + city_list.remove('Mobile').remove('Erie')
+                                          + ['LA','NYC','DC',"L\.A\.",'N\.Y\.C.',"D\.C\."]) + r')\b',re.IGNORECASE)
 
 web_url_regex = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
 

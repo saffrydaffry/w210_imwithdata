@@ -135,21 +135,29 @@ def process_twitter(actionability_ranking: pd.DataFrame):
             score -= 20
         if 'join us' in tweet.lower():
             score -= 10
+        if 'dreamhome' in tweet.lower():
+            score -= 20
         if 'sales' in tweet.lower():
             score -= 20
         if 'relaxing' in tweet.lower():
             score -= 20
         if 'canada' in tweet.lower():
             score -= 20
+        if 'toyota' in tweet.lower():
+            score -= 20
         if 'minister' in tweet.lower():
             score -= 20
-        if 'UK' in tweet:
+        if 'uk' in tweet.lower():
             score -= 20
         if 'MP' in tweet:
             score -= 20
-        if 'EU' in tweet:
+        if 'eu' in tweet.lower():
             score -= 20
         if 'england' in tweet.lower():
+            score -= 20
+        if 'furniture' in tweet.lower():
+            score -= 20
+        if 'kitchen' in tweet.lower():
             score -= 20
         if 'germany' in tweet.lower():
             score -= 20
@@ -279,7 +287,7 @@ def process_twitter(actionability_ranking: pd.DataFrame):
 
     ### FILTER THE DF BY TOTAL SCORE AND ELASTIC SEARCH RELEVANCE
     filtered_data = actionability_ranking.loc[
-        (actionability_ranking['total_score'] > 8.5) | (actionability_ranking['es_score'] > 10.0)]
+        (actionability_ranking['total_score'] > 8.5) & (actionability_ranking['es_score'] > 7.0)]
     filtered_tweet_list = filtered_data['tweet'].tolist()
     filtered_score_list = filtered_data['total_score'].tolist()
     filtered_es_score_list = filtered_data['es_score'].tolist()
