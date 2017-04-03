@@ -193,6 +193,8 @@ def process_twitter(actionability_ranking: pd.DataFrame):
             score -= 20
         if 'austria' in tweet.lower():
             score -= 20
+        if 'germany' in tweet.lower():
+            score -= 20
         if 'hiring' in tweet.lower():
             score -= 20
         if 'ice show' in tweet.lower():
