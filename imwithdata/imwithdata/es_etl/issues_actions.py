@@ -240,14 +240,23 @@ states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas','District of Columbia','Cal
           'Massachusetts','Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 
           'New Hampshire','New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 
           'Oregon','Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah',
-          'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming','IA', 'KS', 'UT', 
-          'VA', 'NC', 'NE', 'SD', 'AL', 'ID', 'FM', 'DE', 'AK', 'Conn', 'NM', 'MS',  
-          'CO', 'NJ', 'FL', 'MN', 'NV', 'AZ', 'WI', 'ND', 'OK', 'KY', 'RI', 'NH', 'MO', 'ME', 'VT',
-          'GA', 'NY', 'CA', 'HI', 'IL', 'TN', 'Mass', 'OH', 'MD', 'MI', 'WY', 'WA', 'SC',
-          'IN', 'LA', 'DC', 'AR', 'WV', 'TX','Minn','Ark','Ind','D\.C\.',
-          'Mich','Mizz','Nev','Okl','Penn','S\. Carolina','N\. Carolina','S Carolina','N Carolina','Tenn','Tex']
+          'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming','ALABAMA', 'ALASKA', 'ARIZONA', 
+          'ARKANSAS','DISTRICT OF COLUMBIA','CALIFORNIA', 'COLORADO', 'CONNECTICUT', 'DELAWARE', 'FLORIDA', 'GEORGIA', 
+          'HAWAII', 'IDAHO','ILLINOIS', 'INDIANA', 'IOWA', 'KANSAS', 'KENTUCKY', 'LOUISIANA', 'MAINE', 'MARYLAND', 
+          'MASSACHUSETTS','MICHIGAN', 'MINNESOTA', 'MISSISSIPPI', 'MISSOURI', 'MONTANA', 'NEBRASKA', 'NEVADA', 
+          'NEW HAMPSHIRE','NEW JERSEY', 'NEW MEXICO', 'NEW YORK', 'NORTH CAROLINA', 'NORTH DAKOTA', 'OHIO', 'OKLAHOMA', 
+          'OREGON','PENNSYLVANIA', 'RHODE ISLAND', 'SOUTH CAROLINA', 'SOUTH DAKOTA', 'TENNESSEE', 'TEXAS', 'UTAH',
+          'VERMONT', 'VIRGINIA', 'WASHINGTON', 'WEST VIRGINIA', 'WISCONSIN', 'WYOMING','NY','NYC']
 
-state_regex = re.compile(r'(' + '|\\b'.join(states) + '|' + '|'.join([state + '\\b' for state in states])  + r')')
+state_abbrevs = ['IA', 'KS', 'UT', 'MA','MI','MO',
+          'VA', 'NC', 'NE', 'SD', 'AL', 'ID', 'FM', 'DE', 'AK', 'Conn', 'NM', 'MS', 'GA',
+          'CO', 'NJ', 'FL', 'MN', 'NV', 'AZ', 'WI', 'ND', 'OK', 'KY', 'RI', 'NH', 'MO', 'ME', 'VT',
+          'NY', 'CA', 'HI', 'IL', 'TN', 'Mass', 'OH', 'MD', 'MI', 'WY', 'WA', 'SC','PA',
+          'IN', 'LA', 'DC', 'AR', 'WV', 'TX','Minn','Ark','Ind','D\.C\.',
+          'Mizz','Nev','Okl','Penn','S\. Carolina','N\. Carolina','S Carolina','N Carolina','Tenn','Tex']
+
+state_regex = re.compile(r'(' + '|\\b'.join(states) + '|' + '|'.join([state + '\\b' for state in states])
+                                                    + '|' + '|'.join(['\\b' + state + '\\b' for state in state_abbrevs])+ r')')
 cities = pd.read_csv(os.path.join(PROJECT_ROOT,
                                   'data',
                                   'Top5000Population.csv')
