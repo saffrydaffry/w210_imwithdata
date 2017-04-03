@@ -141,6 +141,10 @@ def process_twitter(actionability_ranking: pd.DataFrame):
             score -= 20
         if 'relaxing' in tweet.lower():
             score -= 20
+        if 'ice ice baby' in tweet.lower():
+            score -= 20
+        if 'interior design' in tweet.lower():
+            score -= 20
         if 'canada' in tweet.lower():
             score -= 20
         if 'toyota' in tweet.lower():
@@ -264,16 +268,16 @@ def process_twitter(actionability_ranking: pd.DataFrame):
     actionability_ranking['pos_score'] = np.asarray(language_scores)
 
     ### ADD ACTIONABILITY SCORE TO PANDAS DF BASED ON FIELDS WE EXTRACTED
-    actionability_ranking['actionability_score'] = (np.where(actionability_ranking['tweet_cities'] == '[]', 0, 4) +
-                                                    np.where(actionability_ranking['tweet_states'] == '[]', 0, 2) +
+    actionability_ranking['actionability_score'] = (np.where(actionability_ranking['tweet_cities'] == '[]', 0, 10) +
+                                                    np.where(actionability_ranking['tweet_states'] == '[]', 0, 5) +
                                                     np.where(actionability_ranking['tweet_urls'] == '[]', 0, 1) +
                                                     np.where(actionability_ranking['tweet_phone_numbers'] == '[]', 0,
-                                                             4) +
+                                                             5) +
                                                     np.where(actionability_ranking['tweet_dates_ref'] == '[]', 0, 8) +
                                                     np.where(actionability_ranking['tweet_legislator_names'] == '[]', 0,
-                                                             1) +
+                                                             5) +
                                                     np.where(actionability_ranking['tweet_legislator_handles'] == '[]',
-                                                             0, 1) +
+                                                             0, 3) +
                                                     np.where(actionability_ranking['tweet'].str.startswith('@'), -10,
                                                              0) +
                                                     np.where(actionability_ranking['tweet'].str.startswith('.@'), -10,
@@ -326,8 +330,8 @@ def process_twitter(actionability_ranking: pd.DataFrame):
                                 u'tweet_urls', u'tweet_phone_numbers', u'tweet_dates_ref',
                                 u'tweet_legislator_names', u'tweet_legislator_handles']]
 
+    final_data.to_csv('/Users/brosskatz/PycharmProjects/rzst/w210_imwithdata/imwithdata/data/static_data/final_data_example.csv')
     
-
     return final_data
 
 

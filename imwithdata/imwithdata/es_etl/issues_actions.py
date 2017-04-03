@@ -255,7 +255,7 @@ state_abbrevs = ['IA', 'KS', 'UT', 'MA','MI','MO',
           'IN', 'LA', 'DC', 'AR', 'WV', 'TX','Minn','Ark','Ind','D\.C\.',
           'Mizz','Nev','Okl','Penn','S\. Carolina','N\. Carolina','S Carolina','N Carolina','Tenn','Tex']
 
-state_regex = re.compile(r'(' + '|\\b'.join(states) + '|' + '|'.join([state + '\\b' for state in states])
+state_regex = re.compile(r'(\\b' + '|\\b'.join(states) + '|' + '|'.join([state + '\\b' for state in states])
                                                     + '|' + '|'.join(['\\b' + state + '\\b' for state in state_abbrevs])+ r')')
 cities = pd.read_csv(os.path.join(PROJECT_ROOT,
                                   'data',
