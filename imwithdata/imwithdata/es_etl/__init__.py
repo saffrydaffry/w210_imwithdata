@@ -113,53 +113,75 @@ class ElasticSearchQueryETL(object):
                     continue
                 # EXTRACT PHONE NUMBER, URL, STATE, CITY, DATE, LEGISLATOR NAMES, AND LEGISLATOR TWITTER HANDLES #
                 # -- Phone Numbers -- #
-                phone_numbers = []
-                if phonenumbers.PhoneNumberMatcher(tweet, "US"):
-                    for match in phonenumbers.PhoneNumberMatcher(tweet, "US"):
-                                phone_numbers.append(phonenumbers.format_number(match.number,
-                                                                                phonenumbers.PhoneNumberFormat.NATIONAL))
+                phone_numbers = ''
+                phone_matches = phonenumbers.PhoneNumberMatcher(tweet, "US")
+                if phone_matches:
+                    phone_matches = list(set(phone_matches))
+                    if len(phone_matches) == 1:  
+                        phone_numbers = phonenumbers.format_number(match.number,phonenumbers.PhoneNumberFormat.NATIONAL)
+                    elif len(phone_matches) > 1:
+                        phone_numbers = '; '.join(matches)
+                        
                 # -- States -- #
-                states = []
-                if state_regex.match(tweet):
-                    for match in re.findall(state_regex, tweet):
-                        states.append(match)
+                states = ''
+                tweet_states = re.findall(state_regex,tweet)
+                if tweet_states:
+                    tweet_states = list(set(tweet_states))
+                    if len(tweet_states) == 1:
+                        states = tweet_states
+                    else:
+                        states = '; '.join(tweet_states)
                 
                 # -- CITIES -- #
-                cities = []
-                if city_regex.match(tweet):
-                    for match in re.findall(city_regex, tweet):
-                        if match != 'White House' and match != 'Liberal' and match != 'Perry' and match != 'Price':
-                            cities.append(match)
+                cities = ''
+                tweet_cities = re.findall(city_regex,tweet)
+                if tweet_cities:
+                    tweet_cities = list(set([city.title() for city in tweet_cities]))
+                    if len(tweet_cities) == 1:
+                        cities = tweet_cities[0]
+                    else:
+                        cities = '; '.join(tweet_cities)
                 
                 # -- URLS -- #
-                urls = []
-                if re.findall(web_url_regex,tweet):
-                    urls.append(re.findall(web_url_regex, tweet))
+                urls = ''
+                tweet_urls = re.findall(web_url_regex,tweet)
+                if tweet_urls:
+                    tweet_urls = list(set(tweet_urls))
+                if len(tweet_urls) == 1:
+                    urls = tweet_urls[0]
+                else:
+                    urls = '; '.join(tweet_urls)
 
                 # -- DATES -- #
-                dates = []
-                # SPACY NLP
+                dates = ''
                 doc = nlp(tweet)
-                # ITERATING THROUGH ENTITIES FROM SPACY
-                for ent in doc.ents:
-                    ### EXCLUDE SOME DIRTY DATES FROM TWITTER THAT SPACY MISTAKENLY INCLUDES
-                    if ent.label_ == 'DATE':
-                        if re.findall(date_include_regex, ent.text) and 'weeks' not in ent.text and 'months' not in ent.text and 'old' not in ent.text:
-                            dates.append(ent.text)
+                all_dates = [doc.text for doc in doc.ents if doc.label_ == 'DATE']
+                date_matches = re.findall(date_include_regex, ' '.join(all_dates))
+                ### EXCLUDE SOME DIRTY DATES FROM TWITTER THAT SPACY MISTAKENLY INCLUDES    
+                if date_matches:
+                    dates = all_dates[0]
                         #re.findall(date_exclude_regex,ent.text)
                         
 
                 # -- LEGISLATOR NAMES -- #
-                leg_names = []
-                if leg_name_regex.match(tweet):
-                    for match in re.findall(leg_name_regex, tweet):
-                        leg_names.append(match)
+                leg_names = ''
+                tweet_legislators = re.findall(leg_name_regex,tweet)
+                tweet_legislators = list(set(tweet_legislators))
+                if tweet_legislators:
+                    if len(tweet_legislators) == 1:
+                        leg_names = tweet_legislators[0]
+                    else:
+                        leg_names = '; '.join(tweet_legislators)
 
                 # -- LEGISLATOR TWITTER HANDLES -- #
-                leg_twitter_handles = []
-                if leg_twitter_regex.match(tweet):
-                    for match in re.findall(leg_twitter_regex, tweet):
-                        leg_twitter_handles.append(match)
+                leg_twitter_handles = ''
+                tweet_leg_handles = re.findall(leg_twitter_regex,tweet)
+                tweet_leg_handles = list(set(tweet_leg_handles))
+                if tweet_leg_handles:
+                    if len(tweet_leg_handles) == 1:
+                        leg_twitter_handles = tweet_leg_handles[0]
+                else:
+                    leg_twitter_handles = '; '.join(tweet_leg_handles)
 
                 # process if only first item is needed
                 temp_row = {'tweet_cities': cities,
