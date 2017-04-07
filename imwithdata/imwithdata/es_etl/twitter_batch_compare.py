@@ -231,8 +231,31 @@ def process_twitter(actionability_ranking: pd.DataFrame):
             score -= 20
         if 'alex jones' in tweet.lower():
             score -= 1000
-        if 'performance' in tweet.lower():
+        if 'viral' in tweet.lower():
             score -= 20
+        if 'scotland' in tweet.lower():
+            score -= 20
+        if 'brexit' in tweet.lower():
+            score -= 20
+        if 'caretoclick' in tweet.lower():
+            score -= 10
+        if 'ministry' in tweet.lower():
+            score -= 20
+        if 'ugh' in tweet.lower():
+            score -= 30
+        if 'london' in tweet.lower():
+            score -= 30
+        if 'wales' in tweet.lower():
+            score -= 30
+        if '@youtube' in tweet.lower():
+            score -= 20
+        if 'breitbart' in tweet.lower():
+            score -= 20
+        if 'hypocrite' in tweet.lower():
+            score -= 20
+        if '!!!' in tweet.lower():
+            score -= 10
+
         if re.findall(profanity_regex, tweet.lower()):
             score -= 50
 
