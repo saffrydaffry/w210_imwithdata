@@ -12,6 +12,10 @@ import os
 import spacy
 import re
 import phonenumbers
+from sunlight import congress
+sunlight.apikey = 'thisisakey'
+import math
+import datetime
 
 from sqlalchemy import create_engine
 from imwithdata.es_etl.issues_actions import (
@@ -29,11 +33,12 @@ nlp = spacy.load('en')
 
 
 #### THIS IS THE FUNCTION TO IMPORT
-def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'append'):
+def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append'):
     """
     Function takes processed pandas dataframe and pushes to SQL. config.ini must have [mysql] credentials for the Drupal database in order to work.
     
-    output_data_frame: Function takes output_data_frame from twitter_batch_compare.py or similar 
+    output_data: Function takes output_data from twitter_batch_compare.py or similar. For legislators and townhalls, 
+                    it is prepared to take a .csv file from static data. It tests for whether output_data is a dataframe before proceeding.
     data_type: Indicates how the data should be processed/structured and where it should be located in Drupal
     to_existing_data: Tells Pandas whether to 'replace', 'append',or 'fail' if the table exists. We will only use 'replace' or 'append'
     """
@@ -52,9 +57,12 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
                     )
     
     conn = engine.connect()
-    
-    actions = output_data_frame.sort('total_score', ascending=[0])
-    
+
+    if isinstance(output_data, pd.DataFrame):
+        actions = output_data.sort('total_score', ascending=[0])
+    else:
+        return "Expected Twitter data to come in as Pandas DataFrame"
+
     if data_type == 'twitter':
         
         ### Lists for extracting data and passing to final dataframe
@@ -229,10 +237,10 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
 
     elif data_type == 'legislators':
         
-        if isinstance(output_data_frame, pd.DataFrame):
-            legislator_df = output_data_frame
+        if isinstance(output_data, pd.DataFrame):
+            legislator_df = output_data
         else:
-            legislator_df = pd.DataFrame(output_data_frame)
+            legislator_df = pd.read_csv(output_data,encoding='utf-8')
         
         final_legislator_df = legislator_df[['title','first_name','last_name','state','state_name','party','website',
                                      'phone','oc_email','contact_form']]
@@ -243,12 +251,65 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
         
         
     elif data_type == 'townhalls':
-        if isinstance(output_data_frame, pd.DataFrame):
-            townhalls_df = output_data_frame
+        if isinstance(output_data pd.DataFrame):
+            townhalls_df = output_data_
         else:
-            townhalls_df = pd.DataFrame(output_data_frame)
+            townhalls_df = pd.read_csv(output_data,encoding='utf-8')
             
-        townhalls['event_title'] = townhalls['event_legislator'] + ' ' + townhalls['event_meeting_type']
+        townhalls['event_id'] = townhalls['|']
+        townhalls['event_source'] = 'Townhall Project'
+        townhalls['event_score'] = 65
+        townhalls['event_issues'] = 'All Issues'
+        townhalls['event_title'] = townhalls['|__Member'] + ' ' + townhalls['|__meetingType']
+        townhalls['event_description'] = townhalls['|__Notes'].str.encode('utf-8')
+        townhalls['event_location_name'] = townhalls['|__Location']
+        townhalls['event_address'] = townhalls['|__address']
+        townhalls['event_city'] = townhalls['|__City']
+        townhalls['event_state'] = townhalls['|__State']
+        townhalls['event_zip'] = townhalls['|__Zip']
+        townhalls['event_district'] = townhalls['|__District']
+        townhalls['event_full_address'] = (townhalls['|__Location'].map(str) + ', ' + townhalls['|__address'].map(str) + ', ' 
+                                           + townhalls['|__City'].map(str) + ', ' + townhalls['|__State'].map(str) + ' ' 
+                                           + townhalls['|__Zip'].map(str))
+        townhalls['event_location_phone'] = ''
+        townhalls['event_rsvp_to'] = townhalls['|__RSVP']
+        townhalls['event_lat'] = townhalls['|__lat']
+        townhalls['event_lng'] = townhalls['|__lng']
+        townhalls['event_date'] = pd.to_datetime(townhalls['|__yearMonthDay']).dt.strftime('%Y-%m-%d')
+        townhalls['event_start_time'] = townhalls['|__timeStart24']
+        townhalls['event_end_time'] = townhalls['|__timeEnd24']
+        townhalls['event_time_zone'] = townhalls['|__timeZone']
+        townhalls['event_url'] = townhalls['|__link']
+        townhalls['event_group_associated'] = 'Townhall Project'
+        townhalls['event_group_url'] = '<p><a href="https://townhallproject.com/" target="_blank">Townhall Project</a></p>'
+        townhalls['event_legislator'] = townhalls['|__Member']
+        townhalls['event_meeting_type'] = townhalls['|__meetingType']
+
+        townhalls_final = townhalls[['event_id',
+                        'event_score',
+                        'event_issues',
+                        'event_title',
+                        'event_description',
+                        'event_location_name',
+                        'event_address',
+                        'event_city',
+                        'event_state',
+                        'event_zip',
+                        'event_district',
+                        'event_full_address',
+                        'event_location_phone',
+                        'event_rsvp_to',
+                        'event_lat',
+                        'event_lng',
+                        'event_date',
+                        'event_start_time',
+                        'event_end_time',
+                        'event_time_zone',
+                        'event_url',
+                        'event_group_associated',
+                        'event_group_url',
+                        'event_legislator',
+                        'event_meeting_type']]
         
         townhalls = townhalls[['event_title',
                        'event_description',
@@ -260,5 +321,122 @@ def data_to_sql(output_data_frame, data_type = 'twitter', to_existing_data = 'ap
                        'event_legislator',
                        'event_meeting_type'
                       ]]
-        townhalls.to_sql('rzst_events',conn,if_exists=to_existing_data,index=False)
+        
+        townhalls_final.drop_duplicates(inplace=True)
+        
+        mask = (pd.to_datetime(townhalls_final['event_date'])>datetime.datetime.today())
+        
+        townhalls_final = townhalls_final[mask]
+        
+        townhalls_final.to_sql('rzst_events',conn,if_exists=to_existing_data,index=False)
+    
+    elif data_type == 'meetup':
+        
+        if isinstance(output_data, pd.DataFrame):
+            townhalls_df = output_data
+        else:
+            townhalls_df = pd.DataFrame(output_data)
+
+        associated_legislators = []
+        associated_districts = []
+
+        for i, lat in enumerate(meetup_data['_source.group.lat'].tolist()):
+            if lat:
+                legs = '; '.join([leg['title'] + '. ' + leg['first_name'] + ' ' + leg['last_name'] 
+                                  for leg in 
+                                  congress.locate_legislators_by_lat_lon(lat, meetup_data['_source.group.lon'].tolist()[i])])
+                dists = '; '.join([dist['state'] + '-' + str(dist['district']).zfill(2) 
+                         for dist in 
+                         congress.locate_districts_by_lat_lon(lat,meetup_data['_source.group.lon'].tolist()[i])])
+            else:
+                legs = ''
+                dists = ''
+
+            associated_legislators.append(legs)
+            associated_districts.append(dists)
+            
+        meetup_data['legislators'] = associated_legislators
+        meetup_data['districts'] = associated_districts
+
+
+        meetup_data['timedelt'] = pd.Series([ pd.Timedelta(milliseconds=i) for i in
+                                                 meetup_data['_source.utc_offset'].tolist()])
+        meetup_data['event_delt'] = pd.Series([ pd.Timedelta(milliseconds=i) 
+                                                   if math.isnan(i) == False else 0.0 
+                                                   for i in meetup_data['_source.duration'].tolist()])
+
+
+        meetup_data['event_id'] = meetup_data['_id']
+        meetup_data['event_source'] = 'Meetup.com'
+        meetup_data['event_score'] = meetup_data['_score'] * 100
+        meetup_data['event_issues'] = meetup_data['_index']
+        meetup_data['event_title'] = meetup_data['_source.name']
+        meetup_data['event_description'] = meetup_data['_source.description'].str.encode('utf-8')
+        meetup_data['event_location_name'] = meetup_data['_source.venue.name']
+        meetup_data['event_address'] = meetup_data['_source.venue.address_1']
+        meetup_data['event_city'] = meetup_data['_source.venue.city']
+        meetup_data['event_state'] = meetup_data['_source.venue.state']
+        meetup_data['event_zip'] = meetup_data['_source.venue.zip']
+        meetup_data['event_district'] = meetup_data['districts']
+        meetup_data['event_full_address'] = (meetup_data['event_location_name'].map(str) + ', ' +
+                                                 meetup_data['event_address'].map(str) + ', ' +
+                                                 meetup_data['event_city'].map(str) + ', ' +
+                                                 meetup_data['event_state'].map(str) + ' ' +
+                                                 meetup_data['event_zip'].map(str))
+        meetup_data['event_location_phone'] = meetup_data['_source.venue.phone']
+        meetup_data['event_rsvp_to'] = meetup_data['_source.link']
+        meetup_data['event_lat'] = meetup_data['_source.venue.lat']
+        meetup_data['event_lng'] = meetup_data['_source.venue.lon']
+        meetup_data['event_date'] = ((pd.to_datetime(meetup_data['_source.time']) -
+                                      meetup_data['timedelt']).dt.strftime('%Y-%m-%d'))
+        meetup_data['event_start_time'] = ((pd.to_datetime(meetup_data['_source.time']) -
+                                            meetup_data['timedelt']).dt.strftime('%H:%M'))
+        meetup_data['event_end_time'] = ((pd.to_datetime(meetup_data['_source.time']) +
+                                          meetup_data['event_delt']).dt.strftime('%H:%M'))
+        meetup_data['event_time_zone'] = ''
+        meetup_data['event_url'] = meetup_data['_source.link']
+        meetup_data['event_group_associated'] =  meetup_data['_source.group.name']
+        meetup_data['event_group_url'] = '<p><a href="https://www.meetup.com/" target="_blank">Meetup.com</a></p>'
+        meetup_data['event_legislator'] = meetup_data['legislators']
+        meetup_data['event_meeting_type'] = 'Meetup'
+            
+        meetup_final = meetup_data[[
+                'event_id',
+                'event_source',
+                'event_score',
+                'event_issues',
+                'event_title',
+                'event_description',
+                'event_location_name',
+                'event_address',
+                'event_city',
+                'event_state',
+                'event_zip',
+                'event_district',
+                'event_full_address',
+                'event_location_phone',
+                'event_rsvp_to',
+                'event_lat',
+                'event_lng',
+                'event_date',
+                'event_start_time',
+                'event_end_time',
+                'event_time_zone',
+                'event_url',
+                'event_group_associated',
+                'event_group_url',
+                'event_legislator',
+                'event_meeting_type'
+                      ]]
+        
+        meetup_final.drop_duplicates(inplace=True)
+        
+        mask = (pd.to_datetime(meetup_final['event_date'])>datetime.datetime.today())
+
+        meetup_final = meetup_final[mask]
+        
+        meetup_final.to_sql('rzst_events',conn,if_exists=to_existing_data,index=False)
+        
+    else: 
+        print('Data type not found. Please select meetup, twitter, townhalls, or legislators')
     
