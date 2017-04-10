@@ -58,12 +58,12 @@ def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append')
     
     conn = engine.connect()
 
-    if isinstance(output_data, pd.DataFrame):
-        actions = output_data.sort('total_score', ascending=[0])
-    else:
-        return "Expected Twitter data to come in as Pandas DataFrame"
-
     if data_type == 'twitter':
+
+        if isinstance(output_data, pd.DataFrame):
+            actions = output_data.sort('total_score', ascending=[0])
+        else:
+            return "Expected Twitter data to come in as Pandas DataFrame"
         
         ### Lists for extracting data and passing to final dataframe
         issue_list = actions['issue'].tolist()
