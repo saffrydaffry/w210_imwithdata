@@ -333,9 +333,9 @@ def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append')
     elif data_type == 'meetup':
         
         if isinstance(output_data, pd.DataFrame):
-            townhalls_df = output_data
+            meetup_data = output_data
         else:
-            townhalls_df = pd.DataFrame(output_data)
+            meetup_data = pd.DataFrame(output_data)
 
         associated_legislators = []
         associated_districts = []
