@@ -12,11 +12,11 @@ import os
 import spacy
 import re
 import phonenumbers
-from sunlight import congress
-sunlight.apikey = 'thisisakey'
 import math
 import datetime
+import sunlight
 
+from sunlight import congress
 from sqlalchemy import create_engine
 from imwithdata.es_etl.issues_actions import (
     state_regex,
@@ -31,20 +31,25 @@ from imwithdata.utils import get_ini_vals
 time_regex = re.compile(r'\d{1,2}(?:(?:am|pm)|(?::\d{1,2})(?:am|pm)?)', re.IGNORECASE)
 nlp = spacy.load('en')
 
+# filler apikey required for sunlight API
+sunlight.apikey = 'thisisakey'
+
 
 #### THIS IS THE FUNCTION TO IMPORT
-def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append'):
+def data_to_sql(output_data, data_type='twitter', to_existing_data='append'):
     """
-    Function takes processed pandas dataframe and pushes to SQL. config.ini must have [mysql] credentials for the Drupal database in order to work.
+    Function takes processed pandas dataframe and pushes to SQL. 
+    config.ini must have [mysql] credentials for the Drupal database in order to work.
     
     output_data: Function takes output_data from twitter_batch_compare.py or similar. For legislators and townhalls, 
-                    it is prepared to take a .csv file from static data. It tests for whether output_data is a dataframe before proceeding.
+        it is prepared to take a .csv file from static data. 
+        It tests for whether output_data is a dataframe before proceeding.
     data_type: Indicates how the data should be processed/structured and where it should be located in Drupal
-    to_existing_data: Tells Pandas whether to 'replace', 'append',or 'fail' if the table exists. We will only use 'replace' or 'append'
+    to_existing_data: Tells Pandas whether to 'replace', 'append',or 'fail' if the table exists. 
+    We will only use 'replace' or 'append'
     """
     
     config_file = os.path.join(os.pardir, 'config', 'config.ini')
-
     mysql_creds = get_ini_vals(config_file, 'mysql')
     
     engine = create_engine(
@@ -61,7 +66,9 @@ def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append')
     if data_type == 'twitter':
 
         if isinstance(output_data, pd.DataFrame):
-            actions = output_data.sort('total_score', ascending=[0])
+            actions = output_data.sort('total_score',
+                                       ascending=[0]
+                                       )
         else:
             return "Expected Twitter data to come in as Pandas DataFrame"
         
@@ -163,7 +170,7 @@ def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append')
                         phone_number = '; '.join(matches)
   
             urls = ''
-            tweet_urls = re.findall(web_url_regex,tweet)
+            tweet_urls = re.findall(web_url_regex, tweet)
             if tweet_urls:
                 tweet_urls = list(set(tweet_urls))
                 if len(tweet_urls) == 1:
@@ -184,7 +191,6 @@ def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append')
         #### THIS CODE DOES NOT ITERATE OVER EACH TWEET
         #### IT UTILIZES THE CITIES LIST CREATED ABOVE
         #### TO CREATE A CITY, STATE LIST
-
         for i, city in enumerate(cities):
             city_state = ''
             state = states[i]
@@ -206,9 +212,8 @@ def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append')
             if city_state == 'Mobile':
                 city_state = ''
             city_states.append(city_state)
-        
+
         ### SEND DATA TO SQL
-        
         prepped_to_sql = pd.DataFrame(
                         {'id': id_list,
                          'title': [title.encode('utf-8') for title in titles],
@@ -247,14 +252,20 @@ def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append')
         
         final_legislator_df.sort_values(['state_name'], ascending=[ True],inplace=True)
         
-        final_legislator_df.to_sql('rzst_legislators',conn,if_exists='replace',index=False)
+        final_legislator_df.to_sql('rzst_legislators',
+                                   conn,
+                                   if_exists='replace',
+                                   index=False
+                                   )
         
         
     elif data_type == 'townhalls':
-        if isinstance(output_data pd.DataFrame):
+        if isinstance(output_data, pd.DataFrame):
             townhalls_df = output_data_
         else:
-            townhalls_df = pd.read_csv(output_data,encoding='utf-8')
+            townhalls_df = pd.read_csv(output_data,
+                                       encoding='utf-8'
+                                       )
             
         townhalls['event_id'] = townhalls['|']
         townhalls['event_source'] = 'Townhall Project'
@@ -281,7 +292,7 @@ def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append')
         townhalls['event_time_zone'] = townhalls['|__timeZone']
         townhalls['event_url'] = townhalls['|__link']
         townhalls['event_group_associated'] = 'Townhall Project'
-        townhalls['event_group_url'] = '<p><a href="https://townhallproject.com/" target="_blank">Townhall Project</a></p>'
+        townhalls['event_group_url'] = 'https://townhallproject.com'
         townhalls['event_legislator'] = townhalls['|__Member']
         townhalls['event_meeting_type'] = townhalls['|__meetingType']
 
@@ -311,7 +322,7 @@ def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append')
                         'event_legislator',
                         'event_meeting_type']]
         
-        townhalls = townhalls[['event_title',
+        townhalls = townhalls_final[['event_title',
                        'event_description',
                        'event_location',
                        'event_date',
@@ -321,6 +332,8 @@ def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append')
                        'event_legislator',
                        'event_meeting_type'
                       ]]
+        # if event_url blank, fill with townhall.com
+        townhalls['event_url'] = townhalls['event_url'].fillna(10) = "https://townhallproject.com"
         
         townhalls_final.drop_duplicates(inplace=True)
         
@@ -328,7 +341,10 @@ def data_to_sql(output_data, data_type = 'twitter', to_existing_data = 'append')
         
         townhalls_final = townhalls_final[mask]
         
-        townhalls_final.to_sql('rzst_events',conn,if_exists=to_existing_data,index=False)
+        townhalls_final.to_sql('rzst_events',
+                               conn,
+                               if_exists=to_existing_data,
+                               index=False)
     
     elif data_type == 'meetup':
         

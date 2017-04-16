@@ -52,7 +52,6 @@ def df_from_s3(bucket, key, s3_client):
     return pd.read_csv(buffer)
 
 
-
 def process_twitter(actionability_ranking: pd.DataFrame):
     """Filter actionable items.
 

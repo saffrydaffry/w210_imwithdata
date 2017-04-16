@@ -41,25 +41,54 @@ class ElasticSearchQueryETL(object):
                  date=None,
                  first_match=True):
         self.issue = None                          # Gets defined within the query runs
-        self.action=None
-        self.firstline = True
+        self.action = None
+        self.tweets_firstline = True
+        self.meetup_firstline = True
         self.key_prefix = "es_staging"              # add date of index before upload
-        self.line_count = 0
+        self.line_count = dict.fromkeys(['meetup', 'twitter'], 0.0)
         self.es = es
         self.date = date                            # given date of index being queried
         self.outfile = "es_data.csv"
-        self.buffer = open(self.outfile, "w")
         self.querytimestamp = datetime.now().isoformat()
         self.FIRST_MATCH = first_match
+        self.doc_type = None
 
     @property
     def query(self):
         return 'message: "' + '" OR "'.join(actions[self.action]) + '"'
 
-    @property
-    def s3_loc(self):
-        self.key_prefix = "/".join([self.key_prefix, self.date])
-        return "/".join([self.key_prefix, self.outfile])
+    def s3_loc(self, doc_type="twitter"):
+        return "/".join([self.key_prefix, self.date, doc_type, self.outfile])
+
+    def _write_meetup(self, results):
+        # a little cheat with pandas since we
+        # can assume the meetup data will be small
+        from pandas.io.json import json_normalize
+
+        meetup_file = "meetup"+ "_" + self.outfile
+        # iterate through each tweet
+        n_results = len(results['hits']['hits'])
+        if n_results > 0:
+            data = []
+            print("Writing %s meetup results.\n" % n_results)
+            for result in tqdm(results['hits']['hits']):
+                data.append(result)
+
+            df = json_normalize(data)
+            df.drop_duplicates(inplace=True,
+                               subset="_source.id"
+                               )
+            counts = df.shape[0]
+            if self.meetup_firstline:
+                self.meetup_firstline = False
+                df.to_csv(meetup_file,
+                          index=False)
+            else:
+                df.to_csv(meetup_file,
+                          mode='a',
+                          header=False,
+                          index=False)
+            self.line_count['meetup'] += counts
 
     def _write_tweets(self, results):
         fieldnames_ = ['issue',
@@ -76,18 +105,16 @@ class ElasticSearchQueryETL(object):
                        'tweet_dates_ref',
                        'tweet_legislator_names',
                        'tweet_legislator_handles',
-                       # TODO: Ross to filter 'message' section of document for address
                        'tweet'
                        ]
-        if self.firstline:
-            self.firstline = False
-            # TODO: Modify and add sections to match
+        if self.tweets_firstline:
+            self.tweets_firstline = False
+            buffer = open("twitter_" + self.outfile, "w")
             # rzst_events table in Drupal MySQL backend.
-            self.writer = csv.DictWriter(self.buffer,
+            self.writer = csv.DictWriter(buffer,
                                          fieldnames=fieldnames_
                                          )
             self.writer.writeheader()
-
         # instantiate the row to be written as empty dict
         row = dict.fromkeys(fieldnames_, "")
 
@@ -111,20 +138,24 @@ class ElasticSearchQueryETL(object):
                     print(result['_source'])
                     # skip meetup for now
                     continue
+
                 # EXTRACT PHONE NUMBER, URL, STATE, CITY, DATE, LEGISLATOR NAMES, AND LEGISLATOR TWITTER HANDLES #
                 # -- Phone Numbers -- #
-                phone_numbers = ''
+                phone_numbers = []
                 phone_matches = phonenumbers.PhoneNumberMatcher(tweet, "US")
-                if phone_matches:
-                    phone_matches = list(set(phone_matches))
-                    if len(phone_matches) == 1:  
-                        phone_numbers = phonenumbers.format_number(match.number,phonenumbers.PhoneNumberFormat.NATIONAL)
-                    elif len(phone_matches) > 1:
-                        phone_numbers = '; '.join(matches)
+                while phone_matches.has_next():
+                    print("~Found a phone number!")
+                    number = phone_matches.next()
+                    number = phonenumbers.format_number(number.number,
+                                                        phonenumbers.PhoneNumberFormat.NATIONAL
+                                                        )
+                    phone_numbers.append(number)
+                    print(number)
+                phone_numbers = '; '.join(phone_numbers)
                         
                 # -- States -- #
                 states = ''
-                tweet_states = re.findall(state_regex,tweet)
+                tweet_states = re.findall(state_regex, tweet)
                 if tweet_states:
                     tweet_states = list(set(tweet_states))
                     if len(tweet_states) == 1:
@@ -134,7 +165,7 @@ class ElasticSearchQueryETL(object):
                 
                 # -- CITIES -- #
                 cities = ''
-                tweet_cities = re.findall(city_regex,tweet)
+                tweet_cities = re.findall(city_regex, tweet)
                 if tweet_cities:
                     tweet_cities = list(set([city.title() for city in tweet_cities]))
                     if len(tweet_cities) == 1:
@@ -144,7 +175,7 @@ class ElasticSearchQueryETL(object):
                 
                 # -- URLS -- #
                 urls = ''
-                tweet_urls = re.findall(web_url_regex,tweet)
+                tweet_urls = re.findall(web_url_regex, tweet)
                 if tweet_urls:
                     tweet_urls = list(set(tweet_urls))
                 if len(tweet_urls) == 1:
@@ -161,11 +192,10 @@ class ElasticSearchQueryETL(object):
                 if date_matches:
                     dates = all_dates[0]
                         #re.findall(date_exclude_regex,ent.text)
-                        
 
                 # -- LEGISLATOR NAMES -- #
                 leg_names = ''
-                tweet_legislators = re.findall(leg_name_regex,tweet)
+                tweet_legislators = re.findall(leg_name_regex, tweet)
                 tweet_legislators = list(set(tweet_legislators))
                 if tweet_legislators:
                     if len(tweet_legislators) == 1:
@@ -175,13 +205,13 @@ class ElasticSearchQueryETL(object):
 
                 # -- LEGISLATOR TWITTER HANDLES -- #
                 leg_twitter_handles = ''
-                tweet_leg_handles = re.findall(leg_twitter_regex,tweet)
+                tweet_leg_handles = re.findall(leg_twitter_regex, tweet)
                 tweet_leg_handles = list(set(tweet_leg_handles))
                 if tweet_leg_handles:
-                    if len(tweet_leg_handles) == 1:
-                        leg_twitter_handles = tweet_leg_handles[0]
-                else:
-                    leg_twitter_handles = '; '.join(tweet_leg_handles)
+                    #if len(tweet_leg_handles) == 1:
+                    #    leg_twitter_handles = tweet_leg_handles[0]
+                    #else:
+                   leg_twitter_handles = '; '.join(tweet_leg_handles)
 
                 # process if only first item is needed
                 temp_row = {'tweet_cities': cities,
@@ -194,8 +224,7 @@ class ElasticSearchQueryETL(object):
                             }
 
                 if self.FIRST_MATCH:
-                    temp_row = {key: (value[0] if len(value) > 0 else value)
-                                for key, value in temp_row.items()}
+                    temp_row = {key: value for key, value in temp_row.items()}
 
 
                 # fill in the values to row
@@ -215,7 +244,7 @@ class ElasticSearchQueryETL(object):
                 if row['tweet'][:2] == "RT":
                     continue
                 self.writer.writerow(row)
-                self.line_count += 1
+                self.line_count['twitter'] += 1
         else:
             print("No results to save!")
             return None
@@ -223,7 +252,27 @@ class ElasticSearchQueryETL(object):
     def run(self, action_key):
         self.action = action_key
         indices = [index for index in self.es.indices.get_alias().keys() if "-" in index]
-
+        doc_types = {
+            'twitter':
+                {
+                    'list': [
+                        'twitter',
+                        'immigrants',
+                        'worker',
+                        'climate',
+                        'voting',
+                        'lgbt',
+                        'womens_right',
+                        'speech',
+                        'healthcare'
+                    ],
+                    'func': self._write_tweets
+                },
+            'meetup': {
+                    'list': ['meetup'],
+                    'func': self._write_meetup
+                }
+        }
         # if a date is given, only query that date's indices
         if self.date:
             indices = [index for index in indices if self.date in index]
@@ -238,26 +287,46 @@ class ElasticSearchQueryETL(object):
 
             print("Querying index %s" % index_)
             print(self.query)
-            results = self.es.search(index=index_,
-                                     q=self.query,
-                                     size=10000,     # have to manually set this, default is 10
-                                     request_timeout=30)
-            self._write_tweets(results)
+            if "meetup" in self.issue:
+                print("Extracting meetup data.")
+                results = self.es.search(index=index_,
+                                         q=self.query,
+                                         size=10000,     # have to manually set this, default is 10
+                                         request_timeout=30)
+                self._write_meetup(results)
+
+            else:
+                for doc_type in doc_types.keys():
+                    print("Querying type %s" % doc_type)
+                    self.doc_type = doc_type
+                    results = self.es.search(index=index_,
+                                             doc_type=doc_types[doc_type]['list'],
+                                             q=self.query,
+                                             size=10000,     # have to manually set this, default is 10
+                                             request_timeout=30)
+                    doc_types[doc_type]['func'](results)
+                    #self._write_tweets(results)
 
     def stop(self):
-        self.buffer.close()
-        upload_key = self.s3_loc
-        print("Uploading {line_count} results to s3://{bucket}/{s3_loc}".format(line_count=self.line_count,
-                                                                                bucket=bucket,
-                                                                                s3_loc=upload_key
-                                                                                )
-              )
-        s3.upload_file(self.outfile, bucket, upload_key)
-        response = s3.put_object_acl(ACL='public-read', Bucket='mids-capstone-rzst',Key=upload_key)['ResponseMetadata']
-        if response['HTTPStatusCode'] == 200:
-            print("Successfully set permissions to public-read")
-        else:
-            print("Failed to set permissions for %s" % upload_key)
+        for doc_type in ['twitter', 'meetup']:
+            upload_key = self.s3_loc(doc_type)
+            file = "_".join([doc_type, self.outfile])
+            if os.path.isfile(file):
+                print("""Uploading {line_count} {type} results to 
+                s3://{bucket}/{s3_loc}
+                """.format(line_count=self.line_count[doc_type],
+                           type=doc_type,
+                           bucket=bucket,
+                           s3_loc=upload_key
+                           )
+                      )
+                s3.upload_file(file, bucket, upload_key)
+                response = s3.put_object_acl(ACL='public-read', Bucket='mids-capstone-rzst',
+                                             Key=upload_key)['ResponseMetadata']
+                if response['HTTPStatusCode'] == 200:
+                    print("Successfully set permissions to public-read")
+                else:
+                    print("Failed to set permissions for %s" % upload_key)
 
-        print("Removing local temp file %s" % self.outfile)
-        os.remove(self.outfile)
+                print("Removing local temp file %s" % file)
+                os.remove(file)
