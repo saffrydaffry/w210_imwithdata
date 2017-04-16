@@ -144,13 +144,11 @@ class ElasticSearchQueryETL(object):
                 phone_numbers = []
                 phone_matches = phonenumbers.PhoneNumberMatcher(tweet, "US")
                 while phone_matches.has_next():
-                    print("~Found a phone number!")
                     number = phone_matches.next()
                     number = phonenumbers.format_number(number.number,
                                                         phonenumbers.PhoneNumberFormat.NATIONAL
                                                         )
                     phone_numbers.append(number)
-                    print(number)
                 phone_numbers = '; '.join(phone_numbers)
                         
                 # -- States -- #
@@ -158,29 +156,20 @@ class ElasticSearchQueryETL(object):
                 tweet_states = re.findall(state_regex, tweet)
                 if tweet_states:
                     tweet_states = list(set(tweet_states))
-                    if len(tweet_states) == 1:
-                        states = tweet_states
-                    else:
-                        states = '; '.join(tweet_states)
+                    states = '; '.join(tweet_states)
                 
                 # -- CITIES -- #
                 cities = ''
                 tweet_cities = re.findall(city_regex, tweet)
                 if tweet_cities:
                     tweet_cities = list(set([city.title() for city in tweet_cities]))
-                    if len(tweet_cities) == 1:
-                        cities = tweet_cities[0]
-                    else:
-                        cities = '; '.join(tweet_cities)
+                    cities = '; '.join(tweet_cities)
                 
                 # -- URLS -- #
                 urls = ''
                 tweet_urls = re.findall(web_url_regex, tweet)
                 if tweet_urls:
                     tweet_urls = list(set(tweet_urls))
-                if len(tweet_urls) == 1:
-                    urls = tweet_urls[0]
-                else:
                     urls = '; '.join(tweet_urls)
 
                 # -- DATES -- #
