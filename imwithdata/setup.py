@@ -6,7 +6,7 @@ from setuptools import setup
 if sys.version_info[0] != 3:
     sys.exit("Python 3 required")
 
-version = os.environ['BUILD_NUMBER'] if 'BUILD_NUMBER' in os.environ else '1.0'
+version = os.environ['BUILD_NUMBER'] if 'BUILD_NUMBER' in os.environ else '1.1'
 
 setup(name='imwithdata',
       version=version,
