@@ -34,3 +34,7 @@ imwithdata/build/lib/imwithdata/es_etl/__init__.py
 
 imwithdata/build/lib/imwithdata/__init__.py
 
+
+imwithdata/data/static_data/votesmart_officials.csv
+
+notebooks/issues_actions.py

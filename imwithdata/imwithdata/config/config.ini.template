@@ -25,4 +25,7 @@ kibana_port =
 
 [pop3.email]
 gmail_user = 
-gmail_password = 
+gmail_password =
+
+[votesmart]
+key=
