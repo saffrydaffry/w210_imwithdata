@@ -283,15 +283,15 @@ def process_twitter(actionability_ranking: pd.DataFrame):
     actionability_ranking['pos_score'] = np.asarray(language_scores)
 
     ### ADD ACTIONABILITY SCORE TO PANDAS DF BASED ON FIELDS WE EXTRACTED
-    actionability_ranking['actionability_score'] = (np.where(actionability_ranking['tweet_cities'] == '', 0, 10) +
-                                                    np.where(actionability_ranking['tweet_states'] == '', 0, 5) +
-                                                    np.where(actionability_ranking['tweet_urls'] == '', 0, 1) +
-                                                    np.where(actionability_ranking['tweet_phone_numbers'] == '', 0, 5) +
-                                                    np.where(actionability_ranking['tweet_dates_ref'] == '', 0, 8) +
-                                                    np.where(actionability_ranking['tweet_legislator_names'] == '', 0, 5) +
-                                                    np.where(actionability_ranking['tweet_legislator_handles'] == '',0, 3)
-                                                    # np.where(actionability_ranking['tweet'].to_string().str.find('\@') == 0, -10, 0) +
-                                                    # np.where(actionability_ranking['tweet'].apply(str).str[:2] == '.@', -10, 0)
+    actionability_ranking['actionability_score'] = (np.where(actionability_ranking['tweet_cities'].astype(str) == '', 0, 10) +
+                                                    np.where(actionability_ranking['tweet_states'].astype(str) == '', 0, 5) +
+                                                    np.where(actionability_ranking['tweet_urls'].astype(str) == '', 0, 1) +
+                                                    np.where(actionability_ranking['tweet_phone_numbers'].astype(str) == '', 0, 5) +
+                                                    np.where(actionability_ranking['tweet_dates_ref'].astype(str) == '', 0, 8) +
+                                                    np.where(actionability_ranking['tweet_legislator_names'].astype(str) == '', 0, 5) +
+                                                    np.where(actionability_ranking['tweet_legislator_handles'].astype(str) == '',0, 3)
+                                                    # np.where(actionability_ranking['tweet'].astype(str).str.find('\@') == 0, -10, 0) +
+                                                    # np.where(actionability_ranking['tweet'].astype(str).str[:2] == '.@', -10, 0)
                                                     )
 
     ### CALCULATE THE TOTAL SCORE
