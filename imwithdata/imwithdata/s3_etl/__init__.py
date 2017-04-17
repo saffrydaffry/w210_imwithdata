@@ -397,7 +397,7 @@ def meetup(meetup_df, conn):
     new_df = []
     count = 0
     badrows = 0
-    for index, row in tqdm(meetup_df.iterrows()):
+    for index, row in meetup_df.iterrows():
         try:
             lat = row['_source.group.lat']
             if lat:
