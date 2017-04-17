@@ -364,7 +364,7 @@ def townhalls(df, conn):
                            index=False)
 
 
-def meetup(meetup_df):
+def meetup(meetup_df, conn):
     temp_row = dict.fromkeys([
         'event_id',
         'event_source',
