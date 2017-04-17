@@ -452,7 +452,6 @@ def meetup_rows(meetup_df):
     return pd.DataFrame(new_df)
 
 
-
 def meetup(df, conn):
     if isinstance(df, pd.DataFrame):
         meetup_data = df
