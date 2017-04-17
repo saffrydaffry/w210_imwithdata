@@ -217,7 +217,8 @@ class ElasticSearchQueryETL(object):
                 tweet_urls = re.findall(web_url_regex, tweet)
                 if tweet_urls:
                     tweet_urls = list(set(tweet_urls))
-                    urls = '; '.join(tweet_urls)
+                    # only select the first URL for inclusion on the homepage
+                    urls = tweet_urls[0]
 
                 # -- DATES -- #
                 dates = ''
