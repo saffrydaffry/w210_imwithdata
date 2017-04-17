@@ -209,7 +209,7 @@ def twitter(df, conn):
          'state': actions['tweet_states'].tolist(),
          'city_state': actions['city_state'].tolist(),
          'phone_number': actions['tweet_phone_numbers'].tolist(),
-         'urls': [url.encode('utf-8') for url in actions['tweet_urls'].tolist()],
+         'urls': [str(url).encode('utf-8') for url in actions['tweet_urls'].tolist()],
          'date_of_action': actions['tweet_dates_ref'].tolist(),
          'announced_date': actions['tweet_timestamp'].tolist(),
          'query_date': actions['query_timestamp'].tolist()
