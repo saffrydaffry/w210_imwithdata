@@ -428,11 +428,11 @@ def meetup(meetup_df, conn):
             temp_row['event_city'] = row['_source.venue.city']
             temp_row['event_state'] = row['_source.venue.state']
             temp_row['event_zip'] = row['_source.venue.zip']
-            temp_row['event_full_address'] = (temp_row['event_location_name'].map(str) + ', ' +
-                                              temp_row['event_address'].map(str) + ', ' +
-                                              temp_row['event_city'].map(str) + ', ' +
-                                              temp_row['event_state'].map(str) + ' ' +
-                                              temp_row['event_zip'].map(str))
+            temp_row['event_full_address'] = (temp_row['event_location_name'] + ', ' +
+                                              temp_row['event_address'] + ', ' +
+                                              temp_row['event_city'] + ', ' +
+                                              temp_row['event_state'] + ' ' +
+                                              temp_row['event_zip'])
             temp_row['event_location_phone'] = row['_source.venue.phone']
             temp_row['event_rsvp_to'] = row['_source.link']
             temp_row['event_lat'] = row['_source.venue.lat']
