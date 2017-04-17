@@ -201,7 +201,7 @@ def twitter(df, conn):
          'description': [tweet.capitalize().encode('utf-8') if tweet.isupper() else tweet.encode('utf-8') for tweet in actions['tweet'].tolist()],
          'action': [action.encode('utf-8') for action in actions['action'].tolist()],
          'issue': [issue.encode('utf-8') for issue in actions['issue'].tolist()],
-         'total_score': total_score_list,
+         'total_score': actions['total_score'].tolist(),
          'relevance_score': actions['es_score'].tolist(),
          'legislators': actions['tweet_legislator_names'].tolist(),
          'legislator_twitter': actions['tweet_legislator_handles'].tolist(),
