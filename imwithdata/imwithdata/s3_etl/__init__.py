@@ -390,7 +390,8 @@ def meetup_rows(meetup_df):
         'event_url',
         'event_group_associated',
         'event_group_url',
-        'event_legislator',
+        'event_legislators',
+        'event_districts',
         'event_meeting_type'
     ])
     new_df = []
@@ -398,14 +399,23 @@ def meetup_rows(meetup_df):
     badrows = 0
     for row in tqdm(meetup_df.iterrows()):
         try:
-            #temp_row['legislators'] = associated_legislators
-            #temp_row['districts'] = associated_districts
+            lat = row['_source.group.lat']
+            if lat:
+                associated_legislators = '; '.join([leg['title'] + '. ' + leg['first_name'] + ' ' + leg['last_name']
+                                                    for leg in congress.locate_legislators_by_lat_lon(lat,row['_source.group.lon'])])
+                associated_districts = '; '.join([dist['state'] + '-' + str(dist['district']).zfill(2)
+                                                    for dist in congress.locate_districts_by_lat_lon(lat,row['_source.group.lon'])])
+            else:
+                associated_legislators = ''
+                associated_districts = ''
+                
+            temp_row['event_legislators'] = associated_legislators
+            temp_row['event_districts'] = associated_districts
 
-            temp_row['timedelt'] = pd.Series([pd.Timedelta(milliseconds=i) for i in
-                                                 row['_source.utc_offset'].tolist()])
-            temp_row['event_delt'] = pd.Series([pd.Timedelta(milliseconds=i)
-                                                   if math.isnan(i) == False else 0.0
-                                                   for i in row['_source.duration'].tolist()])
+            timedelt = pd.Timedelta(milliseconds=row['_source.utc_offset'])
+
+            duration = row['_source.duration']
+            eventdelt = (pd.Timedelta(milliseconds=duration) if math.isnan(duration) == False else 0.0)
 
             temp_row['event_id'] = row['_id']
             temp_row['event_source'] = 'Meetup.com'
@@ -429,17 +439,17 @@ def meetup_rows(meetup_df):
             temp_row['event_lat'] = row['_source.venue.lat']
             temp_row['event_lng'] = row['_source.venue.lon']
             temp_row['event_date'] = ((pd.to_datetime(row['_source.time']) -
-                                          row['timedelt']).dt.strftime('%Y-%m-%d'))
+                                         timedelt).dt.strftime('%Y-%m-%d'))
             temp_row['event_start_time'] = ((pd.to_datetime(row['_source.time']) -
-                                                row['timedelt']).dt.strftime('%H:%M'))
+                                                timedelt).dt.strftime('%H:%M'))
             temp_row['event_end_time'] = ((pd.to_datetime(row['_source.time']) +
-                                              row['event_delt']).dt.strftime('%H:%M'))
+                                              eventdelt).dt.strftime('%H:%M'))
             temp_row['event_time_zone'] = ''
             temp_row['event_url'] = row['_source.link']
             temp_row['event_group_associated'] = row['_source.group.name']
             temp_row['event_group_url'] = "https://www.meetup.com/"
-            temp_row['event_legislator'] = row['legislators']
             temp_row['event_meeting_type'] = 'Meetup'
+
             new_df.append(temp_row)
         except Exception as e:
             print("Error with row %s" % count)
