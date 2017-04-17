@@ -35,8 +35,33 @@ nlp = spacy.load('en')
 sunlight.apikey = 'thisisakey'
 
 
+def city_state_filter(city_state_str):
+    """Process nonsense city_states
+    
+    :param city_state: 
+    :return: 
+    """
+    if city_state_str == 'Washington, Washington':
+        return 'Washington, DC'
+    if city_state_str == 'Mobile':
+        return ''
+    else:
+        return city_state_str
+
+
+def city_state(cities, states):
+
+    cities = cities.split("; ")
+    states = states.split("; ")
+    city_states_list = [", ".join([city, state]) for city in cities
+                  for state in states]
+    city_states = [city_state_filter(city_state_str) for city_state_str in city_states_list]
+
+    return "; ".join(city_states)
+
+
 #### THIS IS THE FUNCTION TO IMPORT
-def data_to_sql(output_data, data_type='twitter', to_existing_data='append'):
+def rzst_sql(output_data, data_type='twitter', to_existing_data='append'):
     """
     Function takes processed pandas dataframe and pushes to SQL. 
     config.ini must have [mysql] credentials for the Drupal database in order to work.
@@ -191,6 +216,8 @@ def data_to_sql(output_data, data_type='twitter', to_existing_data='append'):
         #### THIS CODE DOES NOT ITERATE OVER EACH TWEET
         #### IT UTILIZES THE CITIES LIST CREATED ABOVE
         #### TO CREATE A CITY, STATE LIST
+
+
         for i, city in enumerate(cities):
             city_state = ''
             state = states[i]
@@ -198,7 +225,7 @@ def data_to_sql(output_data, data_type='twitter', to_existing_data='append'):
                 if state == '':
                     city_state = city
                 elif state != '':
-                    city_state = '; '.join(list(set([cit + ', ' + state.split('; ')[0] for cit in city.split('; ')])))
+                    city_state = '; '.join(list(set([city + ', ' + state.split('; ')[0] for cit in city.split('; ')])))
                 else:
                     city_state = city
             else:

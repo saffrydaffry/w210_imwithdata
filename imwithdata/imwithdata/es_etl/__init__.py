@@ -52,6 +52,7 @@ class ElasticSearchQueryETL(object):
         self.querytimestamp = datetime.now().isoformat()
         self.FIRST_MATCH = first_match
         self.doc_type = None
+        self.meetup_data = []
 
     @property
     def query(self):
@@ -65,12 +66,52 @@ class ElasticSearchQueryETL(object):
         # can assume the meetup data will be small
         from pandas.io.json import json_normalize
 
+        # Ensure each result has consistent fields
+        fieldnames_ = [
+            "_id",
+            "_index",
+            "_score",
+            "_source.created",
+            "_source.description",
+            "_source.duration",
+            "_source.group.created",
+            "_source.group.id",
+            "_source.group.join_mode",
+            "_source.group.lat",
+            "_source.group.lon",
+            "_source.group.name",
+            "_source.group.urlname",
+            "_source.group.who",
+            "_source.id",
+            "_source.link",
+            "_source.manual_attendance_count",
+            "_source.name",
+            "_source.status",
+            "_source.time",
+            "_source.updated",
+            "_source.utc_offset",
+            "_source.venue.address_1",
+            "_source.venue.city",
+            "_source.venue.country",
+            "_source.venue.id",
+            "_source.venue.lat",
+            "_source.venue.localized_country_name",
+            "_source.venue.lon",
+            "_source.venue.name",
+            "_source.venue.phone",
+            "_source.venue.repinned",
+            "_source.venue.state",
+            "_source.venue.zip",
+            "_source.visibility",
+            "_source.waitlist_count",
+            "_source.yes_rsvp_count",
+            "_type"
+        ]
         meetup_file = "meetup"+ "_" + self.outfile
         # iterate through each tweet
         n_results = len(results['hits']['hits'])
         if n_results > 0:
             data = []
-            print("Writing %s meetup results.\n" % n_results)
             for result in tqdm(results['hits']['hits']):
                 data.append(result)
 
@@ -79,15 +120,21 @@ class ElasticSearchQueryETL(object):
                                subset="_source.id"
                                )
             counts = df.shape[0]
+            print("Writing %s meetup results.\n" % counts)
+            for field in fieldnames_:
+                # if a field doesn't exist, add an empty series
+                if not hasattr(df, field):
+                    df[field] = ""
+
             if self.meetup_firstline:
                 self.meetup_firstline = False
-                df.to_csv(meetup_file,
-                          index=False)
+                df[fieldnames_].to_csv(meetup_file,
+                                       index=False)
             else:
-                df.to_csv(meetup_file,
-                          mode='a',
-                          header=False,
-                          index=False)
+                df[fieldnames_].to_csv(meetup_file,
+                                       mode='a',
+                                       header=False,
+                                       index=False)
             self.line_count['meetup'] += counts
 
     def _write_tweets(self, results):
@@ -186,21 +233,14 @@ class ElasticSearchQueryETL(object):
                 leg_names = ''
                 tweet_legislators = re.findall(leg_name_regex, tweet)
                 tweet_legislators = list(set(tweet_legislators))
-                if tweet_legislators:
-                    if len(tweet_legislators) == 1:
-                        leg_names = tweet_legislators[0]
-                    else:
-                        leg_names = '; '.join(tweet_legislators)
+                leg_names = '; '.join(tweet_legislators)
 
                 # -- LEGISLATOR TWITTER HANDLES -- #
                 leg_twitter_handles = ''
                 tweet_leg_handles = re.findall(leg_twitter_regex, tweet)
                 tweet_leg_handles = list(set(tweet_leg_handles))
                 if tweet_leg_handles:
-                    #if len(tweet_leg_handles) == 1:
-                    #    leg_twitter_handles = tweet_leg_handles[0]
-                    #else:
-                   leg_twitter_handles = '; '.join(tweet_leg_handles)
+                    leg_twitter_handles = '; '.join(tweet_leg_handles)
 
                 # process if only first item is needed
                 temp_row = {'tweet_cities': cities,
@@ -215,6 +255,9 @@ class ElasticSearchQueryETL(object):
                 if self.FIRST_MATCH:
                     temp_row = {key: value for key, value in temp_row.items()}
 
+                # Replace commas in tweet to avoid confusing parser
+                # when reading later.
+                tweet = tweet.replace(",", "")
 
                 # fill in the values to row
                 row.update({'issue': self.issue,
