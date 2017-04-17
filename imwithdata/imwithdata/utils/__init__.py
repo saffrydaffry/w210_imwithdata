@@ -289,9 +289,9 @@ def process_twitter(actionability_ranking: pd.DataFrame):
                                                     np.where(actionability_ranking['tweet_phone_numbers'].astype(str) == '', 0, 5) +
                                                     np.where(actionability_ranking['tweet_dates_ref'].astype(str) == '', 0, 8) +
                                                     np.where(actionability_ranking['tweet_legislator_names'].astype(str) == '', 0, 5) +
-                                                    np.where(actionability_ranking['tweet_legislator_handles'].astype(str) == '',0, 3)
-                                                    # np.where(actionability_ranking['tweet'].astype(str).str.find('\@') == 0, -10, 0) +
-                                                    # np.where(actionability_ranking['tweet'].astype(str).str[:2] == '.@', -10, 0)
+                                                    np.where(actionability_ranking['tweet_legislator_handles'].astype(str) == '',0, 3) +
+                                                    np.where(actionability_ranking['tweet'].astype(str).str.find('\@') == 0, -10, 0) +
+                                                    np.where(actionability_ranking['tweet'].astype(str).str[:2] == '.@', -10, 0)
                                                     )
 
     ### CALCULATE THE TOTAL SCORE

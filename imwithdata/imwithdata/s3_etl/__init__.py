@@ -64,6 +64,163 @@ def city_state_process(cities, states):
 
 
 # --- SQL Connections--- #
+def twitter(df, conn):
+    """
+    :param conn: sql connection
+    :return: 
+    """
+
+    if isinstance(df, pd.DataFrame):
+        actions = process_twitter(df)
+    else:
+        raise ImportError("Expected Twitter data to come in as Pandas DataFrame")
+
+        # not sure if this is necessary
+
+        ### Lists for extracting data and passing to final dataframe
+        # issue_list = actions['issue'].tolist()
+        # action_list = actions['action'].tolist()
+        # id_list = actions['id'].tolist()
+        #
+        # es_score_list = actions['es_score'].tolist()
+        # total_score_list = actions['total_score'].tolist()
+        # tweet_list = [tweet.capitalize() if tweet.isupper() else tweet for tweet in actions['tweet'].tolist()]
+        # tweet_timestamp_list = actions['tweet_timestamp'].tolist()
+        # query_timestamp_list = actions['query_timestamp'].tolist()
+        # user_list = actions['tweet_user'].tolist()
+        #
+        # ### Empty buckets for final data extraction
+        # dates = []
+        # start_times = []
+        # end_times = []
+        # cities = []
+        # states = []
+        # legislators = []
+        # legislator_handles = []
+        # phone_numbers = []
+        # titles = []
+        # all_urls = []
+        #
+        # for i, tweet in enumerate(tweet_list):
+        #     date = ''
+        #     start_time = ''
+        #     end_time = ''
+        #     city = ''
+        #     state = ''
+        #     legislator = ''
+        #     legislator_handle = ''
+        #     phone_number = ''
+        #     url = ''
+        #     title = ''
+        #
+        #     doc = nlp(tweet)
+        #     all_dates = [doc.text for doc in doc.ents if doc.label_ == 'DATE']
+        #     date_matches = re.findall(date_include_regex, ' '.join(all_dates))
+        #
+        #     ### EXCLUDE SOME DIRTY DATES FROM TWITTER THAT SPACY MISTAKENLY INCLUDES
+        #     if date_matches:
+        #         date = all_dates[0]
+        #     dates.append(date)
+        #
+        #     times = re.findall(time_regex, tweet)
+        #     times = list(set(times))
+        #     if times:
+        #         start_time = times[0]
+        #     if len(times) > 1:
+        #         end_time = times[1]
+        #     start_times.append(start_time)
+        #     end_times.append(end_time)
+        #
+        #     tweet_cities = re.findall(city_regex, tweet)
+        #     if tweet_cities:
+        #         tweet_cities = list(set([city.title() for city in tweet_cities]))
+        #         if len(tweet_cities) == 1:
+        #             city = tweet_cities[0]
+        #         else:
+        #             city = '; '.join(tweet_cities)
+        #     cities.append(city)
+        #
+        #     tweet_states = re.findall(state_regex, tweet)
+        #     if tweet_states:
+        #         tweet_states = list(set(tweet_states))
+        #         if len(tweet_states) == 1:
+        #             state = tweet_states[0]
+        #         else:
+        #             state = '; '.join(tweet_states)
+        #     states.append(state)
+        #
+        #     tweet_legislators = re.findall(leg_name_regex, tweet)
+        #     if tweet_legislators:
+        #         if len(tweet_legislators) == 1:
+        #             legislator = tweet_legislators[0]
+        #         else:
+        #             legislator = '; '.join(tweet_legislators)
+        #     legislators.append(legislator)
+        #
+        #     tweet_leg_handles = re.findall(leg_twitter_regex, tweet)
+        #     if tweet_leg_handles:
+        #         if len(tweet_leg_handles) == 1:
+        #             legislator_handle = tweet_leg_handles[0]
+        #         else:
+        #             legislator_handle = '; '.join(tweet_leg_handles)
+        #     legislator_handles.append(legislator_handle)
+        #
+        #     phone_numbers = ''
+        #     phone_matches = phonenumbers.PhoneNumberMatcher(tweet, "US")
+        #     if phone_matches:
+        #         phone_matches = list(set(phone_matches))
+        #         if len(phone_matches) == 1:
+        #             phone_number = phonenumbers.format_number(match.number, phonenumbers.PhoneNumberFormat.NATIONAL)
+        #         elif len(phone_matches) > 1:
+        #             phone_number = '; '.join(matches)
+        #
+        # urls = ''
+        # tweet_urls = re.findall(web_url_regex, tweet)
+        # if tweet_urls:
+        #     tweet_urls = list(set(tweet_urls))
+        #     if len(tweet_urls) == 1:
+        #         urls = tweet_urls[0]
+        #     else:
+        #         urls = '; '.join(tweet_urls)
+        # all_urls.append(urls)
+        #
+        # title = tweet
+        # if tweet_urls:
+        #     for urly in tweet_urls:
+        #         title = title.replace(urly, '')
+        # titles.append(title)
+
+    actions['city_state'] = actions.apply(lambda row: city_state_process(row.tweet_cities, row.tweet_states),
+                                          axis=1
+                                          )
+
+    ### SEND DATA TO SQL
+    prepped_to_sql = pd.DataFrame(
+        {'id': actions['id'].tolist(),
+         'title': [tweet.capitalize().encode('utf-8') if tweet.isupper() else tweet.encode('utf-8') for tweet in actions['tweet'].tolist()],
+         'description': [tweet.capitalize().encode('utf-8') if tweet.isupper() else tweet.encode('utf-8') for tweet in actions['tweet'].tolist()],
+         'action': [action.encode('utf-8') for action in actions['action'].tolist()],
+         'issue': [issue.encode('utf-8') for issue in actions['issue'].tolist()],
+         'total_score': total_score_list,
+         'relevance_score': actions['es_score'].tolist(),
+         'legislators': actions['tweet_legislator_names'].tolist(),
+         'legislator_twitter': actions['tweet_legislator_handles'].tolist(),
+         'city':actions['tweet_cities'].tolist(),
+         'state': actions['tweet_states'].tolist(),
+         'city_state': actions['city_state'].tolist(),
+         'phone_number': actions['tweet_phone_numbers'].tolist(),
+         'urls': [url.encode('utf-8') for url in actions['tweet_urls'].tolist()],
+         'date_of_action': actions['tweet_dates_ref'].tolist(),
+         'announced_date': actions['tweet_timestamp'].tolist(),
+         'query_date': actions['query_timestamp'].tolist()
+         })
+
+    prepped_to_sql.to_sql('rzst_action',
+                          conn,
+                          if_exists='append',
+                          index=False)
+
+
 def conn_rzst_sql():
     """
     Function takes processed pandas dataframe and pushes to SQL. 
@@ -98,163 +255,6 @@ def conn_rzst_sql():
         raise
 
     return conn
-
-
-def twitter(df, conn):
-    """
-    :param conn: sql connection
-    :return: 
-    """
-
-    if isinstance(df, pd.DataFrame):
-        actions = process_twitter(df)
-    else:
-        raise ImportError("Expected Twitter data to come in as Pandas DataFrame")
-
-        # not sure if this is necessary
-
-        ### Lists for extracting data and passing to final dataframe
-        issue_list = actions['issue'].tolist()
-        action_list = actions['action'].tolist()
-        id_list = actions['id'].tolist()
-
-        es_score_list = actions['es_score'].tolist()
-        total_score_list = actions['total_score'].tolist()
-        tweet_list = [tweet.capitalize() if tweet.isupper() else tweet for tweet in actions['tweet'].tolist()]
-        tweet_timestamp_list = actions['tweet_timestamp'].tolist()
-        query_timestamp_list = actions['query_timestamp'].tolist()
-        user_list = actions['tweet_user'].tolist()
-
-        ### Empty buckets for final data extraction
-        dates = []
-        start_times = []
-        end_times = []
-        cities = []
-        states = []
-        legislators = []
-        legislator_handles = []
-        phone_numbers = []
-        titles = []
-        all_urls = []
-
-        for i, tweet in enumerate(tweet_list):
-            date = ''
-            start_time = ''
-            end_time = ''
-            city = ''
-            state = ''
-            legislator = ''
-            legislator_handle = ''
-            phone_number = ''
-            url = ''
-            title = ''
-
-            doc = nlp(tweet)
-            all_dates = [doc.text for doc in doc.ents if doc.label_ == 'DATE']
-            date_matches = re.findall(date_include_regex, ' '.join(all_dates))
-
-            ### EXCLUDE SOME DIRTY DATES FROM TWITTER THAT SPACY MISTAKENLY INCLUDES
-            if date_matches:
-                date = all_dates[0]
-            dates.append(date)
-
-            times = re.findall(time_regex, tweet)
-            times = list(set(times))
-            if times:
-                start_time = times[0]
-            if len(times) > 1:
-                end_time = times[1]
-            start_times.append(start_time)
-            end_times.append(end_time)
-
-            tweet_cities = re.findall(city_regex, tweet)
-            if tweet_cities:
-                tweet_cities = list(set([city.title() for city in tweet_cities]))
-                if len(tweet_cities) == 1:
-                    city = tweet_cities[0]
-                else:
-                    city = '; '.join(tweet_cities)
-            cities.append(city)
-
-            tweet_states = re.findall(state_regex, tweet)
-            if tweet_states:
-                tweet_states = list(set(tweet_states))
-                if len(tweet_states) == 1:
-                    state = tweet_states[0]
-                else:
-                    state = '; '.join(tweet_states)
-            states.append(state)
-
-            tweet_legislators = re.findall(leg_name_regex, tweet)
-            if tweet_legislators:
-                if len(tweet_legislators) == 1:
-                    legislator = tweet_legislators[0]
-                else:
-                    legislator = '; '.join(tweet_legislators)
-            legislators.append(legislator)
-
-            tweet_leg_handles = re.findall(leg_twitter_regex, tweet)
-            if tweet_leg_handles:
-                if len(tweet_leg_handles) == 1:
-                    legislator_handle = tweet_leg_handles[0]
-                else:
-                    legislator_handle = '; '.join(tweet_leg_handles)
-            legislator_handles.append(legislator_handle)
-
-            phone_numbers = ''
-            phone_matches = phonenumbers.PhoneNumberMatcher(tweet, "US")
-            if phone_matches:
-                phone_matches = list(set(phone_matches))
-                if len(phone_matches) == 1:
-                    phone_number = phonenumbers.format_number(match.number, phonenumbers.PhoneNumberFormat.NATIONAL)
-                elif len(phone_matches) > 1:
-                    phone_number = '; '.join(matches)
-
-        urls = ''
-        tweet_urls = re.findall(web_url_regex, tweet)
-        if tweet_urls:
-            tweet_urls = list(set(tweet_urls))
-            if len(tweet_urls) == 1:
-                urls = tweet_urls[0]
-            else:
-                urls = '; '.join(tweet_urls)
-        all_urls.append(urls)
-
-        title = tweet
-        if tweet_urls:
-            for urly in tweet_urls:
-                title = title.replace(urly, '')
-        titles.append(title)
-
-    actions['city_state'] = actions.apply(lambda row: city_state_process(row.city, row.states),
-                                          axis=1
-                                          )
-
-    ### SEND DATA TO SQL
-    prepped_to_sql = pd.DataFrame(
-        {'id': id_list,
-         'title': [title.encode('utf-8') for title in titles],
-         'description': [tweet.encode('utf-8') for tweet in tweet_list],
-         'action': [action.encode('utf-8') for action in action_list],
-         'issue': [issue.encode('utf-8') for issue in issue_list],
-         'total_score': total_score_list,
-         'relevance_score': es_score_list,
-         'legislators': legislators,
-         'legislator_twitter': legislator_handles,
-         'city': cities,
-         'state': states,
-         'city_state': city_states,
-         'phone_number': phone_numbers,
-         'urls': [url.encode('utf-8') for url in all_urls],
-         'date_of_action': dates,
-         'announced_date': tweet_timestamp_list,
-         'query_date': query_timestamp_list
-         })
-
-    prepped_to_sql.to_sql('rzst_action',
-                          conn,
-                          if_exists='append',
-                          index=False)
 
 
 def legislators(df, conn):
