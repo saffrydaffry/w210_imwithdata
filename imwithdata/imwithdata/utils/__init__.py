@@ -286,7 +286,7 @@ def process_twitter(actionability_ranking: pd.DataFrame):
                                                     np.where(actionability_ranking['tweet_dates_ref'] == '', 0, 8) +
                                                     np.where(actionability_ranking['tweet_legislator_names'] == '', 0, 5) +
                                                     np.where(actionability_ranking['tweet_legislator_handles'] == '',0, 3) +
-                                                    np.where(actionability_ranking['tweet'].apply(str).str.find('@') == 0, -10, 0) +
+                                                    np.where(actionability_ranking['tweet'].to_string().str.find('\@') == 0, -10, 0) +
                                                     np.where(actionability_ranking['tweet'].apply(str).str[:2] == '.@', -10, 0)
                                                     )
 
