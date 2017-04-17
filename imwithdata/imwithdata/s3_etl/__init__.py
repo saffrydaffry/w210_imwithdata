@@ -438,11 +438,11 @@ def meetup(meetup_df, conn):
             temp_row['event_lat'] = row['_source.venue.lat']
             temp_row['event_lng'] = row['_source.venue.lon']
             temp_row['event_date'] = ((pd.to_datetime(row['_source.time']) -
-                                         timedelt).dt.strftime('%Y-%m-%d'))
+                                         timedelt).strftime('%Y-%m-%d'))
             temp_row['event_start_time'] = ((pd.to_datetime(row['_source.time']) -
-                                                timedelt).dt.strftime('%H:%M'))
+                                                timedelt).strftime('%H:%M'))
             temp_row['event_end_time'] = ((pd.to_datetime(row['_source.time']) +
-                                              eventdelt).dt.strftime('%H:%M'))
+                                              eventdelt).strftime('%H:%M'))
             temp_row['event_time_zone'] = ''
             temp_row['event_url'] = row['_source.link']
             temp_row['event_group_associated'] = row['_source.group.name']
