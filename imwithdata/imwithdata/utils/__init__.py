@@ -282,17 +282,12 @@ def process_twitter(actionability_ranking: pd.DataFrame):
     actionability_ranking['actionability_score'] = (np.where(actionability_ranking['tweet_cities'] == '', 0, 10) +
                                                     np.where(actionability_ranking['tweet_states'] == '', 0, 5) +
                                                     np.where(actionability_ranking['tweet_urls'] == '', 0, 1) +
-                                                    np.where(actionability_ranking['tweet_phone_numbers'] == '', 0,
-                                                             5) +
+                                                    np.where(actionability_ranking['tweet_phone_numbers'] == '', 0, 5) +
                                                     np.where(actionability_ranking['tweet_dates_ref'] == '', 0, 8) +
-                                                    np.where(actionability_ranking['tweet_legislator_names'] == '', 0,
-                                                             5) +
-                                                    np.where(actionability_ranking['tweet_legislator_handles'] == '',
-                                                             0, 3) +
-                                                    np.where(actionability_ranking['tweet'].str.startswith('@'), -10,
-                                                             0) +
-                                                    np.where(actionability_ranking['tweet'].str.startswith('.@'), -10,
-                                                             0)
+                                                    np.where(actionability_ranking['tweet_legislator_names'] == '', 0, 5) +
+                                                    np.where(actionability_ranking['tweet_legislator_handles'] == '',0, 3) +
+                                                    np.where(actionability_ranking['tweet'].str.startswith('@'), -10, 0)
+                                                    # + np.where(actionability_ranking['tweet'].str.startswith('.@'), -10, 0)
                                                     )
 
     ### CALCULATE THE TOTAL SCORE
