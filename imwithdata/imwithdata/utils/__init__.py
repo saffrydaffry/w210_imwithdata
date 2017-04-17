@@ -333,6 +333,7 @@ def process_twitter(actionability_ranking: pd.DataFrame):
     delete_indices = list(set(delete_indices))
 
     ### WE DELETE ROWS WITH THE INDICES THAT WERE FOUND TO BE DUPLICATED AND LESS ACTIONABLE
+    pd.options.mode.chained_assignment = None
     filtered_data.drop(filtered_data.index[delete_indices], inplace=True, errors='ignore')
 
     ### REMOVE SOME OF THE UN-NEEDED COLUMNS BEFORE PUSHING INTO DRUPAL
