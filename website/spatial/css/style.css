@@ -43,6 +43,9 @@
 		a:hover {
 			text-decoration: none;
 		}
+#aboutus p #ischool-link {
+	color: rgba(1,50,102,0.83);
+}
 
 	strong, b {
 		color: #484848;
