@@ -428,7 +428,6 @@ def meetup(meetup_df, conn):
             temp_row['event_city'] = row['_source.venue.city']
             temp_row['event_state'] = row['_source.venue.state']
             temp_row['event_zip'] = row['_source.venue.zip']
-            temp_row['event_district'] = row['districts']
             temp_row['event_full_address'] = (row['event_location_name'].map(str) + ', ' +
                                                  row['event_address'].map(str) + ', ' +
                                                  row['event_city'].map(str) + ', ' +
