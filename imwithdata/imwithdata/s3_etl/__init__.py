@@ -415,7 +415,7 @@ def meetup(meetup_df, conn):
             timedelt = pd.Timedelta(milliseconds=row['_source.utc_offset'])
 
             duration = row['_source.duration']
-            eventdelt = (pd.Timedelta(milliseconds=duration) if math.isnan(duration) == False else 0.0)
+            eventdelt = (pd.Timedelta(milliseconds=duration) if math.isnan(duration) == False else pd.Timedelta(milliseconds=0.0))
 
             temp_row['event_id'] = row['_id']
             temp_row['event_source'] = 'Meetup.com'
