@@ -422,7 +422,7 @@ def meetup(meetup_df, conn):
             temp_row['event_score'] = row['_score'] * 100
             temp_row['event_issues'] = row['_index']
             temp_row['event_title'] = row['_source.name']
-            temp_row['event_description'] = row['_source.description'].encode('utf-8')
+            temp_row['event_description'] = str(row['_source.description']).encode('utf-8')
             temp_row['event_location_name'] = row['_source.venue.name']
             temp_row['event_address'] = row['_source.venue.address_1']
             temp_row['event_city'] = row['_source.venue.city']
@@ -456,7 +456,8 @@ def meetup(meetup_df, conn):
             print(e)
             badrows += 1
         count += 1
-        print("Number of errors %s" % badrows)
+        if count % 10 == 0:
+            print("Number of errors %s" % badrows)
 
     return pd.DataFrame(new_df)
 
