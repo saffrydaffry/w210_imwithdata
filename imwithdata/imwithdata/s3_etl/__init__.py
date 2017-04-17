@@ -364,7 +364,7 @@ def townhalls(df, conn):
                            index=False)
 
 
-def meetup_rows(meetup_df):
+def meetup(meetup_df):
     temp_row = dict.fromkeys([
         'event_id',
         'event_source',
@@ -462,106 +462,106 @@ def meetup_rows(meetup_df):
     return pd.DataFrame(new_df)
 
 
-def meetup(df, conn):
-    if isinstance(df, pd.DataFrame):
-        meetup_data = df
-    else:
-        meetup_data = pd.DataFrame(df)
-
-    associated_legislators = []
-    associated_districts = []
-
-    for i, lat in enumerate(meetup_data['_source.group.lat'].tolist()):
-        if lat:
-            legs = '; '.join([leg['title'] + '. ' + leg['first_name'] + ' ' + leg['last_name']
-                              for leg in
-                              congress.locate_legislators_by_lat_lon(lat, meetup_data['_source.group.lon'].tolist()[i])])
-            dists = '; '.join([dist['state'] + '-' + str(dist['district']).zfill(2)
-                               for dist in
-                               congress.locate_districts_by_lat_lon(lat, meetup_data['_source.group.lon'].tolist()[i])])
-        else:
-            legs = ''
-            dists = ''
-        associated_legislators.append(legs)
-        associated_districts.append(dists)
-
-    meetup_data['legislators'] = associated_legislators
-    meetup_data['districts'] = associated_districts
-
-    meetup_data = meetup_rows(meetup_data)
-    meetup_data['timedelt'] = pd.Series([pd.Timedelta(milliseconds=i) for i in
-                                         meetup_data['_source.utc_offset'].tolist()])
-    meetup_data['event_delt'] = pd.Series([pd.Timedelta(milliseconds=i)
-                                           if math.isnan(i) == False else 0.0
-                                           for i in meetup_data['_source.duration'].tolist()])
-
-    meetup_data['event_id'] = meetup_data['_id']
-    meetup_data['event_source'] = 'Meetup.com'
-    meetup_data['event_score'] = meetup_data['_score'] * 100
-    meetup_data['event_issues'] = meetup_data['_index']
-    meetup_data['event_title'] = meetup_data['_source.name']
-    meetup_data['event_description'] = meetup_data['_source.description'].str.encode('utf-8')
-    meetup_data['event_location_name'] = meetup_data['_source.venue.name']
-    meetup_data['event_address'] = meetup_data['_source.venue.address_1']
-    meetup_data['event_city'] = meetup_data['_source.venue.city']
-    meetup_data['event_state'] = meetup_data['_source.venue.state']
-    meetup_data['event_zip'] = meetup_data['_source.venue.zip']
-    meetup_data['event_district'] = meetup_data['districts']
-    meetup_data['event_full_address'] = (meetup_data['event_location_name'].map(str) + ', ' +
-                                         meetup_data['event_address'].map(str) + ', ' +
-                                         meetup_data['event_city'].map(str) + ', ' +
-                                         meetup_data['event_state'].map(str) + ' ' +
-                                         meetup_data['event_zip'].map(str))
-    meetup_data['event_location_phone'] = meetup_data['_source.venue.phone']
-    meetup_data['event_rsvp_to'] = meetup_data['_source.link']
-    meetup_data['event_lat'] = meetup_data['_source.venue.lat']
-    meetup_data['event_lng'] = meetup_data['_source.venue.lon']
-    meetup_data['event_date'] = ((pd.to_datetime(meetup_data['_source.time']) -
-                                  meetup_data['timedelt']).dt.strftime('%Y-%m-%d'))
-    meetup_data['event_start_time'] = ((pd.to_datetime(meetup_data['_source.time']) -
-                                        meetup_data['timedelt']).dt.strftime('%H:%M'))
-    meetup_data['event_end_time'] = ((pd.to_datetime(meetup_data['_source.time']) +
-                                      meetup_data['event_delt']).dt.strftime('%H:%M'))
-    meetup_data['event_time_zone'] = ''
-    meetup_data['event_url'] = meetup_data['_source.link']
-    meetup_data['event_group_associated'] = meetup_data['_source.group.name']
-    meetup_data['event_group_url'] = "https://www.meetup.com/"
-    meetup_data['event_legislator'] = meetup_data['legislators']
-    meetup_data['event_meeting_type'] = 'Meetup'
-
-    meetup_final = meetup_data[[
-        'event_id',
-        'event_source',
-        'event_score',
-        'event_issues',
-        'event_title',
-        'event_description',
-        'event_location_name',
-        'event_address',
-        'event_city',
-        'event_state',
-        'event_zip',
-        'event_district',
-        'event_full_address',
-        'event_location_phone',
-        'event_rsvp_to',
-        'event_lat',
-        'event_lng',
-        'event_date',
-        'event_start_time',
-        'event_end_time',
-        'event_time_zone',
-        'event_url',
-        'event_group_associated',
-        'event_group_url',
-        'event_legislator',
-        'event_meeting_type'
-    ]]
-
-    meetup_final.drop_duplicates(inplace=True)
-
-    mask = (pd.to_datetime(meetup_final['event_date']) > datetime.datetime.today())
-
-    meetup_final = meetup_final[mask]
-
-    meetup_final.to_sql('rzst_events', conn, if_exists='append', index=False)
+# def meetup(df, conn):
+#     if isinstance(df, pd.DataFrame):
+#         meetup_data = df
+#     else:
+#         meetup_data = pd.DataFrame(df)
+#
+#     associated_legislators = []
+#     associated_districts = []
+#
+#     for i, lat in enumerate(meetup_data['_source.group.lat'].tolist()):
+#         if lat:
+#             legs = '; '.join([leg['title'] + '. ' + leg['first_name'] + ' ' + leg['last_name']
+#                               for leg in
+#                               congress.locate_legislators_by_lat_lon(lat, meetup_data['_source.group.lon'].tolist()[i])])
+#             dists = '; '.join([dist['state'] + '-' + str(dist['district']).zfill(2)
+#                                for dist in
+#                                congress.locate_districts_by_lat_lon(lat, meetup_data['_source.group.lon'].tolist()[i])])
+#         else:
+#             legs = ''
+#             dists = ''
+#         associated_legislators.append(legs)
+#         associated_districts.append(dists)
+#
+#     meetup_data['legislators'] = associated_legislators
+#     meetup_data['districts'] = associated_districts
+#
+#     meetup_data = meetup_rows(meetup_data)
+#     meetup_data['timedelt'] = pd.Series([pd.Timedelta(milliseconds=i) for i in
+#                                          meetup_data['_source.utc_offset'].tolist()])
+#     meetup_data['event_delt'] = pd.Series([pd.Timedelta(milliseconds=i)
+#                                            if math.isnan(i) == False else 0.0
+#                                            for i in meetup_data['_source.duration'].tolist()])
+#
+#     meetup_data['event_id'] = meetup_data['_id']
+#     meetup_data['event_source'] = 'Meetup.com'
+#     meetup_data['event_score'] = meetup_data['_score'] * 100
+#     meetup_data['event_issues'] = meetup_data['_index']
+#     meetup_data['event_title'] = meetup_data['_source.name']
+#     meetup_data['event_description'] = meetup_data['_source.description'].str.encode('utf-8')
+#     meetup_data['event_location_name'] = meetup_data['_source.venue.name']
+#     meetup_data['event_address'] = meetup_data['_source.venue.address_1']
+#     meetup_data['event_city'] = meetup_data['_source.venue.city']
+#     meetup_data['event_state'] = meetup_data['_source.venue.state']
+#     meetup_data['event_zip'] = meetup_data['_source.venue.zip']
+#     meetup_data['event_district'] = meetup_data['districts']
+#     meetup_data['event_full_address'] = (meetup_data['event_location_name'].map(str) + ', ' +
+#                                          meetup_data['event_address'].map(str) + ', ' +
+#                                          meetup_data['event_city'].map(str) + ', ' +
+#                                          meetup_data['event_state'].map(str) + ' ' +
+#                                          meetup_data['event_zip'].map(str))
+#     meetup_data['event_location_phone'] = meetup_data['_source.venue.phone']
+#     meetup_data['event_rsvp_to'] = meetup_data['_source.link']
+#     meetup_data['event_lat'] = meetup_data['_source.venue.lat']
+#     meetup_data['event_lng'] = meetup_data['_source.venue.lon']
+#     meetup_data['event_date'] = ((pd.to_datetime(meetup_data['_source.time']) -
+#                                   meetup_data['timedelt']).dt.strftime('%Y-%m-%d'))
+#     meetup_data['event_start_time'] = ((pd.to_datetime(meetup_data['_source.time']) -
+#                                         meetup_data['timedelt']).dt.strftime('%H:%M'))
+#     meetup_data['event_end_time'] = ((pd.to_datetime(meetup_data['_source.time']) +
+#                                       meetup_data['event_delt']).dt.strftime('%H:%M'))
+#     meetup_data['event_time_zone'] = ''
+#     meetup_data['event_url'] = meetup_data['_source.link']
+#     meetup_data['event_group_associated'] = meetup_data['_source.group.name']
+#     meetup_data['event_group_url'] = "https://www.meetup.com/"
+#     meetup_data['event_legislator'] = meetup_data['legislators']
+#     meetup_data['event_meeting_type'] = 'Meetup'
+#
+#     meetup_final = meetup_data[[
+#         'event_id',
+#         'event_source',
+#         'event_score',
+#         'event_issues',
+#         'event_title',
+#         'event_description',
+#         'event_location_name',
+#         'event_address',
+#         'event_city',
+#         'event_state',
+#         'event_zip',
+#         'event_district',
+#         'event_full_address',
+#         'event_location_phone',
+#         'event_rsvp_to',
+#         'event_lat',
+#         'event_lng',
+#         'event_date',
+#         'event_start_time',
+#         'event_end_time',
+#         'event_time_zone',
+#         'event_url',
+#         'event_group_associated',
+#         'event_group_url',
+#         'event_legislator',
+#         'event_meeting_type'
+#     ]]
+#
+#     meetup_final.drop_duplicates(inplace=True)
+#
+#     mask = (pd.to_datetime(meetup_final['event_date']) > datetime.datetime.today())
+#
+#     meetup_final = meetup_final[mask]
+#
+#     meetup_final.to_sql('rzst_events', conn, if_exists='append', index=False)
