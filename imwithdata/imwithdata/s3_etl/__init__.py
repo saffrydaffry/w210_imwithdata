@@ -54,8 +54,8 @@ def city_state_filter(city_state_str):
 
 
 def city_state_process(cities, states):
-    cities = cities.split("; ")
-    states = states.split("; ")
+    cities = str(cities).split("; ")
+    states = str(states).split("; ")
     city_states_list = [", ".join([city, state]) for city in cities
                         for state in states]
     city_states = [city_state_filter(city_state_str) for city_state_str in city_states_list]
