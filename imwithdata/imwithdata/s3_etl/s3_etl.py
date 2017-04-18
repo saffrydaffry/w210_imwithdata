@@ -72,7 +72,7 @@ def main():
     # S3 input
     parser_s3 = subparsers.add_parser('s3', help="Data source in s3. Only processes twitter, meetup data")
     parser_s3.add_argument("--date", type=str, nargs="?",
-                           default=(datetime.today() - timedelta(days=1)).date.isoformat(),
+                           default=(datetime.today() - timedelta(days=1)).date().strftime(format="%y.%m.%d"),
                            help="Date of data to pull from s3. Expected format is %y.%m.%d")
     parser_s3.set_defaults(func=s3_to_sql)
 
