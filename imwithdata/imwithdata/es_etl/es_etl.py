@@ -7,7 +7,10 @@ Query Data, clean it, and put into RZST.US SQL Backend.
 import argparse
 import os
 from configparser import ConfigParser
-from datetime import datetime
+from datetime import (
+    datetime,
+    timedelta
+)
 
 from elasticsearch import (
     Elasticsearch
@@ -50,7 +53,7 @@ format = "%y.%m.%d"
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--date', default=datetime.now().date().strftime(format=format),
+    parser.add_argument('--date', default=(datetime.now() - timedelta(days=1)).date().strftime(format=format),
                         type=str,
                         help="""The date to query data from. Query all indices, if == 'all'."
                             Date has to be in yy.mm.dd format.
