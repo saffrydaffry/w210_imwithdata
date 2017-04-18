@@ -411,7 +411,7 @@ def meetup(meetup_df, conn):
                 associated_districts = ''
                 
             temp_row['event_legislators'] = associated_legislators
-            temp_row['event_districts'] = associated_districts
+            temp_row['event_district'] = associated_districts
 
             timedelt = pd.Timedelta(milliseconds=row['_source.utc_offset'])
 
