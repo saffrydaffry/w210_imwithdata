@@ -38,6 +38,7 @@ nlp = spacy.load('en')
 # filler apikey required for sunlight API
 sunlight.apikey = 'thisisakey'
 
+
 # --- Helpers --- #
 def city_state_filter(city_state_str):
     """Process nonsense city_states
@@ -456,10 +457,17 @@ def meetup(meetup_df, conn):
             print(e)
             badrows += 1
         count += 1
-        if count % 10 == 0:
-            print("Number of errors %s" % badrows)
 
-    return pd.DataFrame(new_df)
+    print("Number of errors %s" % badrows)
+    meetup_final = pd.DataFrame(new_df)
+    meetup_final.drop_duplicates(inplace=True)
+    mask = (pd.to_datetime(meetup_final['event_date']) > datetime.datetime.today())
+    meetup_final = meetup_final[mask]
+
+    print("Saving to database")
+    meetup_final.to_sql('rzst_events', conn, if_exists='append', index=False)
+
+    return None
 
 
 # def meetup(df, conn):

@@ -7,6 +7,7 @@ while [ "$currentDateTs" -le "$endDateTs" ]
 do
      date=$(date -j -f "%s" $currentDateTs "+%y.%m.%d")
      echo $date
-     python imwithdata/es_etl/es_etl.py --date $date
+     #python imwithdata/es_etl/es_etl.py --date $date
+     python imwithdata/s3_etl/s3_etl.py s3 --date $date
      currentDateTs=$(($currentDateTs+$offset))
 done

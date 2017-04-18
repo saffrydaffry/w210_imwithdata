@@ -45,7 +45,8 @@ def s3_to_sql(args):
         s3_key = get_s3_key(doc_type, date)
         print("From %s" % s3_key)
         data = df_from_s3(bucket=BUCKET, s3_client=s3, key=s3_key)
-        put_rzst_doc[doc_type](data, conn)
+        final_data = put_rzst_doc[doc_type](data, conn)
+
 
 
 def csv_to_sql(args):
