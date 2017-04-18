@@ -392,7 +392,7 @@ def meetup(meetup_df, conn):
         'event_group_associated',
         'event_group_url',
         'event_legislators',
-        'event_districts',
+        'event_district',
         'event_meeting_type'
     ])
     new_df = []
