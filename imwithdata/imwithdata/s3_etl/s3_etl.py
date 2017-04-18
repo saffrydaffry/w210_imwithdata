@@ -2,6 +2,10 @@ import argparse
 import boto3
 import pandas as pd
 
+from datetime import (
+    datetime,
+    timedelta
+)
 from imwithdata.s3_etl import (
     twitter,
     meetup,
@@ -67,7 +71,8 @@ def main():
     subparsers = parser.add_subparsers(help="subcomand help")
     # S3 input
     parser_s3 = subparsers.add_parser('s3', help="Data source in s3. Only processes twitter, meetup data")
-    parser_s3.add_argument("--date", type=str,
+    parser_s3.add_argument("--date", type=str, nargs="?",
+                           default=(datetime.today() - timedelta(days=1)).date.isoformat(),
                            help="Date of data to pull from s3. Expected format is %y.%m.%d")
     parser_s3.set_defaults(func=s3_to_sql)
 
