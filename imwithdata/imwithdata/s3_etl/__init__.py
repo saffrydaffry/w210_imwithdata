@@ -461,7 +461,7 @@ def meetup(meetup_df, conn):
     print("Number of errors %s" % badrows)
     meetup_final = pd.DataFrame(new_df)
     meetup_final.drop_duplicates(inplace=True)
-    mask = (pd.to_datetime(meetup_final['event_date']) > datetime.datetime.today())
+    #mask = (pd.to_datetime(meetup_final['event_date']) > datetime.datetime.today())
     meetup_final = meetup_final[mask]
 
     print("Saving to database")
