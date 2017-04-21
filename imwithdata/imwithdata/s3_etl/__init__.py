@@ -449,7 +449,7 @@ def meetup(meetup_df, conn):
             temp_row['event_group_associated'] = row['_source.group.name']
             temp_row['event_group_url'] = "https://www.meetup.com/"
             temp_row['event_meeting_type'] = 'Meetup'
-
+            print(temp_row)
             new_df.append(temp_row)
         except Exception as e:
             print("Error with row %s" % count)
@@ -459,11 +459,12 @@ def meetup(meetup_df, conn):
         count += 1
 
     print("Number of errors %s" % badrows)
+    print(new_df[:5])
     meetup_final = pd.DataFrame(new_df)
     meetup_final.drop_duplicates(inplace=True)
     #mask = (pd.to_datetime(meetup_final['event_date']) > datetime.datetime.today())
     #meetup_final = meetup_final[mask]
-
+    print("Saving %s entries" % meetup_final.shape[0])
     print("Saving to database")
     meetup_final.to_sql('rzst_events', conn, if_exists='append', index=False)
 
