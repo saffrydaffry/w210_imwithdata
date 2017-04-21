@@ -462,7 +462,7 @@ def meetup(meetup_df, conn):
     meetup_final = pd.DataFrame(new_df)
     meetup_final.drop_duplicates(inplace=True)
     #mask = (pd.to_datetime(meetup_final['event_date']) > datetime.datetime.today())
-    meetup_final = meetup_final[mask]
+    #meetup_final = meetup_final[mask]
 
     print("Saving to database")
     meetup_final.to_sql('rzst_events', conn, if_exists='append', index=False)
