@@ -366,39 +366,39 @@ def townhalls(df, conn):
 
 
 def meetup(meetup_df, conn):
-    temp_row = dict.fromkeys([
-        'event_id',
-        'event_source',
-        'event_score',
-        'event_issues',
-        'event_title',
-        'event_description',
-        'event_location_name',
-        'event_address',
-        'event_city',
-        'event_state',
-        'event_zip',
-        'event_district',
-        'event_full_address',
-        'event_location_phone',
-        'event_rsvp_to',
-        'event_lat',
-        'event_lng',
-        'event_date',
-        'event_start_time',
-        'event_end_time',
-        'event_time_zone',
-        'event_url',
-        'event_group_associated',
-        'event_group_url',
-        'event_legislator',
-        'event_district',
-        'event_meeting_type'
-    ])
     new_df = []
     count = 0
     badrows = 0
     for index, row in tqdm(meetup_df.iterrows()):
+        temp_row = dict.fromkeys([
+            'event_id',
+            'event_source',
+            'event_score',
+            'event_issues',
+            'event_title',
+            'event_description',
+            'event_location_name',
+            'event_address',
+            'event_city',
+            'event_state',
+            'event_zip',
+            'event_district',
+            'event_full_address',
+            'event_location_phone',
+            'event_rsvp_to',
+            'event_lat',
+            'event_lng',
+            'event_date',
+            'event_start_time',
+            'event_end_time',
+            'event_time_zone',
+            'event_url',
+            'event_group_associated',
+            'event_group_url',
+            'event_legislator',
+            'event_district',
+            'event_meeting_type'
+        ])
         try:
             lat = row['_source.group.lat']
             if lat:
@@ -457,9 +457,10 @@ def meetup(meetup_df, conn):
             print(e)
             badrows += 1
         count += 1
-
+    print("Number of entries passed %s" % count)
     print("Number of errors %s" % badrows)
     print(new_df[:5])
+    pirnt(len(new_df))
     meetup_final = pd.DataFrame(new_df)
     meetup_final.drop_duplicates(inplace=True)
     #mask = (pd.to_datetime(meetup_final['event_date']) > datetime.datetime.today())
