@@ -460,7 +460,7 @@ def meetup(meetup_df, conn):
     print("Number of entries passed %s" % count)
     print("Number of errors %s" % badrows)
     print(new_df[:5])
-    pirnt(len(new_df))
+    print(len(new_df))
     meetup_final = pd.DataFrame(new_df)
     meetup_final.drop_duplicates(inplace=True)
     #mask = (pd.to_datetime(meetup_final['event_date']) > datetime.datetime.today())
