@@ -51,7 +51,9 @@ def s3_to_sql(args):
         data = df_from_s3(bucket=BUCKET, s3_client=s3, key=s3_key)
         final_data = put_rzst_doc[doc_type](data, conn)
 
-
+    print("Closing connection")
+    conn.commit()
+    conn.close()
 
 def csv_to_sql(args):
     """Upload a csv file as pandas dataframe
