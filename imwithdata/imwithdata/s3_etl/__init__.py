@@ -340,18 +340,18 @@ def townhalls(df, conn):
                                  'event_legislator',
                                  'event_meeting_type']]
 
-    townhalls = townhalls_final[['event_title',
-                                 'event_description',
-                                 'event_location',
-                                 'event_date',
-                                 'event_time',
-                                 'event_url',
-                                 'event_related_state',
-                                 'event_legislator',
-                                 'event_meeting_type'
-                                 ]]
+    #townhalls = townhalls_final[['event_title',
+    #                             'event_description',
+    #                             'event_location',
+    #                             'event_date',
+    #                             'event_time',
+    #                             'event_url',
+    #                             'event_related_state',
+    #                             'event_legislator',
+    #                             'event_meeting_type'
+    #                             ]]
     # if event_url blank, fill with townhall.com
-    townhalls['event_url'] = townhalls['event_url'].fillna(value="https://townhallproject.com")
+    townhalls_final['event_url'] = townhalls_final['event_url'].fillna(value="https://townhallproject.com")
 
     townhalls_final.drop_duplicates(inplace=True)
 
