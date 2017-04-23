@@ -258,19 +258,19 @@ def process_twitter(actionability_ranking: pd.DataFrame):
             score -= 10
         if 'Take Action: Sign Petition' in tweet:
             score -= 50
-        if 'petition' in tweet:
-            score -= 10
+        if 'petition' in tweet.lower():
+            score -= 15
 
         if re.findall(profanity_regex, tweet.lower()):
             score -= 50
 
         # Penalize tweets with tons of hashtags
         if tweet.count('#') > 2:
-            score -= (tweet.count('#') - 2) * 2
+            score -= (tweet.count('#') - 2) * 5
 
         # Penalize tweets with tons of mentions
         if tweet.count('@') > 2:
-            score -= (tweet.count('@') - 2) * 2
+            score -= (tweet.count('@') - 2) * 5
 
         # Reward tweets with good verbs and no bad verbs
         # PENALIZE TWEETS WITH BAD VERBS AND FEW GOOD VERBS
@@ -284,11 +284,11 @@ def process_twitter(actionability_ranking: pd.DataFrame):
 
         # Reward polite tweets that encourage action
         if tweet.lower().startswith('please'):
-            score += 3
+            score += 10
 
         # Other score adjustments
         # Reward tweets that are longer
-        score += int(len(tweet) / 60)
+        score += int(len(tweet) / 60) * 4
 
         language_scores.append(score)
 

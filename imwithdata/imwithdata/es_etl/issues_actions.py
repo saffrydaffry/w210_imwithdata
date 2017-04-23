@@ -29,38 +29,58 @@ actions = {'charity': ["donat*",
                        "financial support"
                        ],
            'protest': ['protest',
-                       'march'
+                       'march',
+                       'rally'
                        ],
            'petition': ['petition',
-                        'sign',
-                        'call'
+                        'change.org'
                         ],
            'gathering': ["meetup",
                          "huddle",
                          "congregate",
                          "join us"
                          ],
-            'write': ["write postcard",
-                         "write letter",
+           'write': ["write postcard",
+                         "write a letter",
+                        "send a letter",
+                        "send a note",
+                        "write a note",
                          "make signs",
                         "make a sign"
                          ],
-           'boycott': ["boycott"],
+           'boycott': ["boycott",
+                       "culture jam",
+                       "brand war",
+                       "call trump hotel"
+                       ],
            'advocate': ["call",
                         "email",
                         "reach out",
                         "senator",
                         "representative",
-                        "sign petition",
-                        "petition"
+                        "petition",
+                        "send a message",
+                        "speak up"
                         ],
            'vote': ["vote",
-                    "cast your ballot"],
+                    "cast ballot"
+                    ],
+           'volunteer': ["volunteer",
+                         "give your time",
+                         "lend a hand",
+                         "participate",
+                         "sign up",
+                         "organize",
+                         "organizing",
+                         "join up",
+                         "support"
+                         ],
            'townhall': ["town hall",
                         "open office",
                         "town meeting",
                         "townhall",
-                        'virtual townhall']
+                        'virtual townhall'
+                        ]
            }
 
 # Original list of tags, used in ES pull
