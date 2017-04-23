@@ -40,6 +40,11 @@ actions = {'charity': ["donat*",
                          "congregate",
                          "join us"
                          ],
+            'write': ["write postcard",
+                         "write letter",
+                         "make signs",
+                        "make a sign"
+                         ],
            'boycott': ["boycott"],
            'advocate': ["call",
                         "email",

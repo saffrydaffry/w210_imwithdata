@@ -256,6 +256,10 @@ def process_twitter(actionability_ranking: pd.DataFrame):
             score -= 20
         if '!!!' in tweet.lower():
             score -= 10
+        if 'Take Action: Sign Petition' in tweet:
+            score -= 50
+        if 'petition' in tweet:
+            score -= 10
 
         if re.findall(profanity_regex, tweet.lower()):
             score -= 50
