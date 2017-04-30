@@ -241,13 +241,13 @@ def conn_rzst_sql():
 
     try:
         engine = create_engine(
-            """mysql+pymysql://{user}:{password}@{host}:{port}/{db}""".format(user=mysql_creds['user'],
+            """mysql+pymysql://{user}:{password}@{host}:{port}/{db}?charset=utf8""".format(user=mysql_creds['user'],
                                                                               password=mysql_creds['password'],
                                                                               host=mysql_creds['host'],
                                                                               port=mysql_creds['port'],
-                                                                              db=mysql_creds['database'],
-                                                                              encoding='utf-8'
-                                                                              )
+                                                                              db=mysql_creds['database']
+                                                                              ),
+            encoding='utf-8'
         )
         conn = engine.connect()
         conn.execute("select 1;")
