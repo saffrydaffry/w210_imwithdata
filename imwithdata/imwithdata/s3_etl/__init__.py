@@ -245,7 +245,8 @@ def conn_rzst_sql():
                                                                               password=mysql_creds['password'],
                                                                               host=mysql_creds['host'],
                                                                               port=mysql_creds['port'],
-                                                                              db=mysql_creds['database']
+                                                                              db=mysql_creds['database'],
+                                                                              encoding='utf-8'
                                                                               )
         )
         conn = engine.connect()
