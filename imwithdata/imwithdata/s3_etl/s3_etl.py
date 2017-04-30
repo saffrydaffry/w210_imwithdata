@@ -52,7 +52,6 @@ def s3_to_sql(args):
         final_data = put_rzst_doc[doc_type](data, conn)
 
     print("Closing connection")
-    conn.commit()
     conn.close()
 
 def csv_to_sql(args):
