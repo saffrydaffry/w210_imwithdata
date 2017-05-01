@@ -321,7 +321,7 @@ def process_twitter(actionability_ranking: pd.DataFrame):
 
     ### FILTER THE DF BY TOTAL SCORE AND ELASTIC SEARCH RELEVANCE
     filtered_data = actionability_ranking.loc[
-        (actionability_ranking['total_score'] > 10.0) & (actionability_ranking['es_score'] > 7.0)]
+        (actionability_ranking['total_score'] > 8.5) & (actionability_ranking['es_score'] > 7.0)]
     filtered_tweet_list = filtered_data['tweet'].tolist()
     filtered_score_list = filtered_data['total_score'].tolist()
     filtered_es_score_list = filtered_data['es_score'].tolist()

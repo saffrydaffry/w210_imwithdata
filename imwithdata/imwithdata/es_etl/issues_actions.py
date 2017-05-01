@@ -33,7 +33,9 @@ actions = {'charity': ["donat*",
                        'rally'
                        ],
            'petition': ['petition',
-                        'change.org'
+                        'change.org',
+                        'signandshare',
+                        'via change'
                         ],
            'gathering': ["meetup",
                          "huddle",
@@ -41,6 +43,7 @@ actions = {'charity': ["donat*",
                          "join us"
                          ],
            'write': ["write postcard",
+                     "write a postcard",
                          "write a letter",
                         "send a letter",
                         "send a note",
